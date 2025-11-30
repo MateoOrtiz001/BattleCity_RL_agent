@@ -24,6 +24,10 @@ class Bullet:
     def getPosition(self):
         return self.position
     
+    def getPos(self):
+        """Alias de getPosition para consistencia con otras clases."""
+        return self.position
+    
     def getDirection(self):
         return self.direction
     
