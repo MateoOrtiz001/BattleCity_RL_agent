@@ -1,0 +1,802 @@
+[
+    {
+        "episode": 100,
+        "avg_reward": 297.26,
+        "avg_length": 143.32,
+        "win_rate": 0.46,
+        "epsilon": 0.29702999999999996,
+        "time": 12.094361305236816
+    },
+    {
+        "episode": 200,
+        "avg_reward": 500.05,
+        "avg_length": 170.21,
+        "win_rate": 0.57,
+        "epsilon": 0.29402999999999996,
+        "time": 25.224502086639404
+    },
+    {
+        "episode": 300,
+        "avg_reward": 436.75,
+        "avg_length": 191.5,
+        "win_rate": 0.54,
+        "epsilon": 0.29102999999999996,
+        "time": 39.879202127456665
+    },
+    {
+        "episode": 400,
+        "avg_reward": 297.87,
+        "avg_length": 164.53,
+        "win_rate": 0.45,
+        "epsilon": 0.28802999999999995,
+        "time": 52.942447900772095
+    },
+    {
+        "episode": 500,
+        "avg_reward": 567.2,
+        "avg_length": 176.02,
+        "win_rate": 0.63,
+        "epsilon": 0.28502999999999995,
+        "time": 66.23044610023499
+    },
+    {
+        "episode": 600,
+        "avg_reward": 545.33,
+        "avg_length": 174.15,
+        "win_rate": 0.6,
+        "epsilon": 0.28203,
+        "time": 79.05884623527527
+    },
+    {
+        "episode": 700,
+        "avg_reward": 492.44,
+        "avg_length": 184.38,
+        "win_rate": 0.58,
+        "epsilon": 0.27903,
+        "time": 92.73478579521179
+    },
+    {
+        "episode": 800,
+        "avg_reward": 491.51,
+        "avg_length": 188.32,
+        "win_rate": 0.57,
+        "epsilon": 0.27603,
+        "time": 106.62074303627014
+    },
+    {
+        "episode": 900,
+        "avg_reward": 652.66,
+        "avg_length": 182.04,
+        "win_rate": 0.68,
+        "epsilon": 0.27303,
+        "time": 119.87600183486938
+    },
+    {
+        "episode": 1000,
+        "avg_reward": 675.87,
+        "avg_length": 182.67,
+        "win_rate": 0.67,
+        "epsilon": 0.27003,
+        "time": 133.34629845619202
+    },
+    {
+        "episode": 1100,
+        "avg_reward": 578.63,
+        "avg_length": 173.2,
+        "win_rate": 0.62,
+        "epsilon": 0.26703,
+        "time": 146.47446393966675
+    },
+    {
+        "episode": 1200,
+        "avg_reward": 663.55,
+        "avg_length": 191.5,
+        "win_rate": 0.67,
+        "epsilon": 0.26403,
+        "time": 160.11967515945435
+    },
+    {
+        "episode": 1300,
+        "avg_reward": 641.7,
+        "avg_length": 184.63,
+        "win_rate": 0.67,
+        "epsilon": 0.26103,
+        "time": 173.38652634620667
+    },
+    {
+        "episode": 1400,
+        "avg_reward": 595.95,
+        "avg_length": 171.8,
+        "win_rate": 0.63,
+        "epsilon": 0.25803,
+        "time": 185.97906470298767
+    },
+    {
+        "episode": 1500,
+        "avg_reward": 769.66,
+        "avg_length": 176.53,
+        "win_rate": 0.75,
+        "epsilon": 0.25503,
+        "time": 198.6614134311676
+    },
+    {
+        "episode": 1600,
+        "avg_reward": 737.91,
+        "avg_length": 178.8,
+        "win_rate": 0.73,
+        "epsilon": 0.25203000000000003,
+        "time": 211.78994393348694
+    },
+    {
+        "episode": 1700,
+        "avg_reward": 596.87,
+        "avg_length": 168.94,
+        "win_rate": 0.64,
+        "epsilon": 0.24903,
+        "time": 224.07150053977966
+    },
+    {
+        "episode": 1800,
+        "avg_reward": 687.92,
+        "avg_length": 177.13,
+        "win_rate": 0.68,
+        "epsilon": 0.24603,
+        "time": 237.03670144081116
+    },
+    {
+        "episode": 1900,
+        "avg_reward": 753.56,
+        "avg_length": 183.1,
+        "win_rate": 0.73,
+        "epsilon": 0.24303,
+        "time": 250.21219658851624
+    },
+    {
+        "episode": 2000,
+        "avg_reward": 795.17,
+        "avg_length": 174.89,
+        "win_rate": 0.76,
+        "epsilon": 0.24003,
+        "time": 262.8400774002075
+    },
+    {
+        "episode": 2100,
+        "avg_reward": 630.71,
+        "avg_length": 171.12,
+        "win_rate": 0.66,
+        "epsilon": 0.23703,
+        "time": 275.4661192893982
+    },
+    {
+        "episode": 2200,
+        "avg_reward": 873.01,
+        "avg_length": 174.55,
+        "win_rate": 0.82,
+        "epsilon": 0.23403,
+        "time": 288.13251185417175
+    },
+    {
+        "episode": 2300,
+        "avg_reward": 831.82,
+        "avg_length": 173.13,
+        "win_rate": 0.79,
+        "epsilon": 0.23102999999999999,
+        "time": 300.71800804138184
+    },
+    {
+        "episode": 2400,
+        "avg_reward": 769.6,
+        "avg_length": 174.27,
+        "win_rate": 0.76,
+        "epsilon": 0.22802999999999998,
+        "time": 313.7700283527374
+    },
+    {
+        "episode": 2500,
+        "avg_reward": 641.54,
+        "avg_length": 179.15,
+        "win_rate": 0.66,
+        "epsilon": 0.22502999999999998,
+        "time": 327.2219114303589
+    },
+    {
+        "episode": 2600,
+        "avg_reward": 615.56,
+        "avg_length": 179.52,
+        "win_rate": 0.64,
+        "epsilon": 0.22202999999999998,
+        "time": 340.65298342704773
+    },
+    {
+        "episode": 2700,
+        "avg_reward": 726.05,
+        "avg_length": 150.84,
+        "win_rate": 0.72,
+        "epsilon": 0.21902999999999997,
+        "time": 352.4215145111084
+    },
+    {
+        "episode": 2800,
+        "avg_reward": 850.59,
+        "avg_length": 162.5,
+        "win_rate": 0.81,
+        "epsilon": 0.21602999999999997,
+        "time": 364.7117097377777
+    },
+    {
+        "episode": 2900,
+        "avg_reward": 733.77,
+        "avg_length": 151.99,
+        "win_rate": 0.73,
+        "epsilon": 0.21302999999999997,
+        "time": 376.0954315662384
+    },
+    {
+        "episode": 3000,
+        "avg_reward": 802.62,
+        "avg_length": 164.56,
+        "win_rate": 0.76,
+        "epsilon": 0.21002999999999997,
+        "time": 388.26913380622864
+    },
+    {
+        "episode": 3100,
+        "avg_reward": 773.86,
+        "avg_length": 174.68,
+        "win_rate": 0.75,
+        "epsilon": 0.20702999999999996,
+        "time": 400.9934284687042
+    },
+    {
+        "episode": 3200,
+        "avg_reward": 702.35,
+        "avg_length": 176.23,
+        "win_rate": 0.7,
+        "epsilon": 0.20402999999999996,
+        "time": 414.09217596054077
+    },
+    {
+        "episode": 3300,
+        "avg_reward": 747.55,
+        "avg_length": 180.52,
+        "win_rate": 0.72,
+        "epsilon": 0.20102999999999996,
+        "time": 427.4092402458191
+    },
+    {
+        "episode": 3400,
+        "avg_reward": 725.24,
+        "avg_length": 173.65,
+        "win_rate": 0.72,
+        "epsilon": 0.19803,
+        "time": 440.1196494102478
+    },
+    {
+        "episode": 3500,
+        "avg_reward": 739.87,
+        "avg_length": 157.78,
+        "win_rate": 0.72,
+        "epsilon": 0.19503,
+        "time": 451.6701555252075
+    },
+    {
+        "episode": 3600,
+        "avg_reward": 764.59,
+        "avg_length": 150.82,
+        "win_rate": 0.75,
+        "epsilon": 0.19203,
+        "time": 462.9036226272583
+    },
+    {
+        "episode": 3700,
+        "avg_reward": 887.09,
+        "avg_length": 170.28,
+        "win_rate": 0.82,
+        "epsilon": 0.18903,
+        "time": 475.05572032928467
+    },
+    {
+        "episode": 3800,
+        "avg_reward": 784.38,
+        "avg_length": 174.29,
+        "win_rate": 0.76,
+        "epsilon": 0.18603,
+        "time": 487.4672689437866
+    },
+    {
+        "episode": 3900,
+        "avg_reward": 716.05,
+        "avg_length": 176.09,
+        "win_rate": 0.71,
+        "epsilon": 0.18303,
+        "time": 500.16773533821106
+    },
+    {
+        "episode": 4000,
+        "avg_reward": 718.81,
+        "avg_length": 177.18,
+        "win_rate": 0.71,
+        "epsilon": 0.18003000000000002,
+        "time": 512.9367363452911
+    },
+    {
+        "episode": 4100,
+        "avg_reward": 912.32,
+        "avg_length": 165.08,
+        "win_rate": 0.84,
+        "epsilon": 0.17703000000000002,
+        "time": 524.7701268196106
+    },
+    {
+        "episode": 4200,
+        "avg_reward": 778.0,
+        "avg_length": 153.53,
+        "win_rate": 0.74,
+        "epsilon": 0.17403000000000002,
+        "time": 536.397271156311
+    },
+    {
+        "episode": 4300,
+        "avg_reward": 876.22,
+        "avg_length": 165.01,
+        "win_rate": 0.82,
+        "epsilon": 0.17103000000000002,
+        "time": 548.4174802303314
+    },
+    {
+        "episode": 4400,
+        "avg_reward": 761.68,
+        "avg_length": 161.22,
+        "win_rate": 0.74,
+        "epsilon": 0.16803,
+        "time": 560.9451358318329
+    },
+    {
+        "episode": 4500,
+        "avg_reward": 813.5,
+        "avg_length": 160.09,
+        "win_rate": 0.78,
+        "epsilon": 0.16503,
+        "time": 572.5844848155975
+    },
+    {
+        "episode": 4600,
+        "avg_reward": 865.62,
+        "avg_length": 152.48,
+        "win_rate": 0.82,
+        "epsilon": 0.16203,
+        "time": 584.6816446781158
+    },
+    {
+        "episode": 4700,
+        "avg_reward": 824.34,
+        "avg_length": 168.31,
+        "win_rate": 0.78,
+        "epsilon": 0.15903,
+        "time": 597.6400654315948
+    },
+    {
+        "episode": 4800,
+        "avg_reward": 771.16,
+        "avg_length": 166.63,
+        "win_rate": 0.75,
+        "epsilon": 0.15603,
+        "time": 610.2467334270477
+    },
+    {
+        "episode": 4900,
+        "avg_reward": 718.52,
+        "avg_length": 163.27,
+        "win_rate": 0.72,
+        "epsilon": 0.15303,
+        "time": 622.5257525444031
+    },
+    {
+        "episode": 5000,
+        "avg_reward": 768.36,
+        "avg_length": 168.29,
+        "win_rate": 0.75,
+        "epsilon": 0.15003,
+        "time": 634.7427191734314
+    },
+    {
+        "episode": 5100,
+        "avg_reward": 873.73,
+        "avg_length": 166.57,
+        "win_rate": 0.81,
+        "epsilon": 0.14703,
+        "time": 646.8949608802795
+    },
+    {
+        "episode": 5200,
+        "avg_reward": 823.77,
+        "avg_length": 150.33,
+        "win_rate": 0.79,
+        "epsilon": 0.14403,
+        "time": 657.8142738342285
+    },
+    {
+        "episode": 5300,
+        "avg_reward": 879.69,
+        "avg_length": 170.51,
+        "win_rate": 0.81,
+        "epsilon": 0.14103,
+        "time": 670.3297424316406
+    },
+    {
+        "episode": 5400,
+        "avg_reward": 836.84,
+        "avg_length": 157.17,
+        "win_rate": 0.8,
+        "epsilon": 0.13802999999999999,
+        "time": 681.9023833274841
+    },
+    {
+        "episode": 5500,
+        "avg_reward": 762.91,
+        "avg_length": 186.32,
+        "win_rate": 0.73,
+        "epsilon": 0.13502999999999998,
+        "time": 695.3611531257629
+    },
+    {
+        "episode": 5600,
+        "avg_reward": 863.26,
+        "avg_length": 143.76,
+        "win_rate": 0.81,
+        "epsilon": 0.13203,
+        "time": 706.1853444576263
+    },
+    {
+        "episode": 5700,
+        "avg_reward": 869.82,
+        "avg_length": 160.7,
+        "win_rate": 0.81,
+        "epsilon": 0.12903,
+        "time": 718.0834848880768
+    },
+    {
+        "episode": 5800,
+        "avg_reward": 752.75,
+        "avg_length": 174.77,
+        "win_rate": 0.73,
+        "epsilon": 0.12603,
+        "time": 730.9611513614655
+    },
+    {
+        "episode": 5900,
+        "avg_reward": 838.02,
+        "avg_length": 153.29,
+        "win_rate": 0.79,
+        "epsilon": 0.12303,
+        "time": 742.4495313167572
+    },
+    {
+        "episode": 6000,
+        "avg_reward": 782.47,
+        "avg_length": 167.53,
+        "win_rate": 0.76,
+        "epsilon": 0.12003,
+        "time": 755.0278131961823
+    },
+    {
+        "episode": 6100,
+        "avg_reward": 780.96,
+        "avg_length": 172.13,
+        "win_rate": 0.74,
+        "epsilon": 0.11703,
+        "time": 767.6297509670258
+    },
+    {
+        "episode": 6200,
+        "avg_reward": 825.35,
+        "avg_length": 142.94,
+        "win_rate": 0.78,
+        "epsilon": 0.11402999999999999,
+        "time": 778.227698802948
+    },
+    {
+        "episode": 6300,
+        "avg_reward": 901.55,
+        "avg_length": 145.32,
+        "win_rate": 0.84,
+        "epsilon": 0.11102999999999999,
+        "time": 789.1564834117889
+    },
+    {
+        "episode": 6400,
+        "avg_reward": 770.01,
+        "avg_length": 151.14,
+        "win_rate": 0.75,
+        "epsilon": 0.10802999999999999,
+        "time": 800.565052986145
+    },
+    {
+        "episode": 6500,
+        "avg_reward": 847.79,
+        "avg_length": 145.76,
+        "win_rate": 0.8,
+        "epsilon": 0.10502999999999998,
+        "time": 811.5639307498932
+    },
+    {
+        "episode": 6600,
+        "avg_reward": 923.4,
+        "avg_length": 147.22,
+        "win_rate": 0.84,
+        "epsilon": 0.10202999999999998,
+        "time": 822.2641251087189
+    },
+    {
+        "episode": 6700,
+        "avg_reward": 912.77,
+        "avg_length": 158.24,
+        "win_rate": 0.84,
+        "epsilon": 0.09902999999999998,
+        "time": 833.9699821472168
+    },
+    {
+        "episode": 6800,
+        "avg_reward": 792.81,
+        "avg_length": 153.04,
+        "win_rate": 0.75,
+        "epsilon": 0.09603000000000002,
+        "time": 845.5318756103516
+    },
+    {
+        "episode": 6900,
+        "avg_reward": 796.6,
+        "avg_length": 148.36,
+        "win_rate": 0.77,
+        "epsilon": 0.09303000000000002,
+        "time": 856.5466637611389
+    },
+    {
+        "episode": 7000,
+        "avg_reward": 830.22,
+        "avg_length": 173.98,
+        "win_rate": 0.79,
+        "epsilon": 0.09003000000000001,
+        "time": 869.3095395565033
+    },
+    {
+        "episode": 7100,
+        "avg_reward": 741.68,
+        "avg_length": 150.37,
+        "win_rate": 0.73,
+        "epsilon": 0.08703000000000001,
+        "time": 881.662760257721
+    },
+    {
+        "episode": 7200,
+        "avg_reward": 841.9,
+        "avg_length": 165.04,
+        "win_rate": 0.78,
+        "epsilon": 0.08403000000000001,
+        "time": 894.0910773277283
+    },
+    {
+        "episode": 7300,
+        "avg_reward": 917.04,
+        "avg_length": 157.82,
+        "win_rate": 0.83,
+        "epsilon": 0.08103,
+        "time": 905.4496431350708
+    },
+    {
+        "episode": 7400,
+        "avg_reward": 1032.55,
+        "avg_length": 145.44,
+        "win_rate": 0.91,
+        "epsilon": 0.07803,
+        "time": 915.9446275234222
+    },
+    {
+        "episode": 7500,
+        "avg_reward": 810.06,
+        "avg_length": 145.76,
+        "win_rate": 0.76,
+        "epsilon": 0.07503,
+        "time": 926.8065087795258
+    },
+    {
+        "episode": 7600,
+        "avg_reward": 824.29,
+        "avg_length": 159.48,
+        "win_rate": 0.78,
+        "epsilon": 0.07203,
+        "time": 938.7011387348175
+    },
+    {
+        "episode": 7700,
+        "avg_reward": 843.14,
+        "avg_length": 152.66,
+        "win_rate": 0.8,
+        "epsilon": 0.06903,
+        "time": 950.102064371109
+    },
+    {
+        "episode": 7800,
+        "avg_reward": 911.85,
+        "avg_length": 138.5,
+        "win_rate": 0.83,
+        "epsilon": 0.06602999999999999,
+        "time": 960.1381981372833
+    },
+    {
+        "episode": 7900,
+        "avg_reward": 907.26,
+        "avg_length": 162.59,
+        "win_rate": 0.84,
+        "epsilon": 0.06302999999999999,
+        "time": 971.6678822040558
+    },
+    {
+        "episode": 8000,
+        "avg_reward": 970.6,
+        "avg_length": 153.09,
+        "win_rate": 0.88,
+        "epsilon": 0.06002999999999998,
+        "time": 982.810955286026
+    },
+    {
+        "episode": 8100,
+        "avg_reward": 894.28,
+        "avg_length": 132.11,
+        "win_rate": 0.82,
+        "epsilon": 0.05703000000000001,
+        "time": 992.6472232341766
+    },
+    {
+        "episode": 8200,
+        "avg_reward": 886.92,
+        "avg_length": 151.73,
+        "win_rate": 0.82,
+        "epsilon": 0.05403000000000001,
+        "time": 1003.5860733985901
+    },
+    {
+        "episode": 8300,
+        "avg_reward": 807.61,
+        "avg_length": 154.59,
+        "win_rate": 0.76,
+        "epsilon": 0.051030000000000006,
+        "time": 1014.8669352531433
+    },
+    {
+        "episode": 8400,
+        "avg_reward": 974.94,
+        "avg_length": 142.8,
+        "win_rate": 0.87,
+        "epsilon": 0.04803,
+        "time": 1025.5324566364288
+    },
+    {
+        "episode": 8500,
+        "avg_reward": 803.58,
+        "avg_length": 167.42,
+        "win_rate": 0.75,
+        "epsilon": 0.04503,
+        "time": 1037.6722660064697
+    },
+    {
+        "episode": 8600,
+        "avg_reward": 890.35,
+        "avg_length": 147.61,
+        "win_rate": 0.83,
+        "epsilon": 0.04203,
+        "time": 1048.5330924987793
+    },
+    {
+        "episode": 8700,
+        "avg_reward": 1005.83,
+        "avg_length": 128.85,
+        "win_rate": 0.9,
+        "epsilon": 0.039029999999999995,
+        "time": 1058.436986207962
+    },
+    {
+        "episode": 8800,
+        "avg_reward": 996.37,
+        "avg_length": 114.48,
+        "win_rate": 0.89,
+        "epsilon": 0.03602999999999999,
+        "time": 1066.9143073558807
+    },
+    {
+        "episode": 8900,
+        "avg_reward": 942.56,
+        "avg_length": 124.93,
+        "win_rate": 0.87,
+        "epsilon": 0.03302999999999999,
+        "time": 1076.0573019981384
+    },
+    {
+        "episode": 9000,
+        "avg_reward": 1044.13,
+        "avg_length": 108.12,
+        "win_rate": 0.93,
+        "epsilon": 0.030029999999999987,
+        "time": 1084.086988210678
+    },
+    {
+        "episode": 9100,
+        "avg_reward": 915.69,
+        "avg_length": 127.83,
+        "win_rate": 0.84,
+        "epsilon": 0.027029999999999988,
+        "time": 1093.216701745987
+    },
+    {
+        "episode": 9200,
+        "avg_reward": 913.63,
+        "avg_length": 141.93,
+        "win_rate": 0.83,
+        "epsilon": 0.024029999999999985,
+        "time": 1103.5936439037323
+    },
+    {
+        "episode": 9300,
+        "avg_reward": 887.49,
+        "avg_length": 147.32,
+        "win_rate": 0.81,
+        "epsilon": 0.021030000000000014,
+        "time": 1114.2471947669983
+    },
+    {
+        "episode": 9400,
+        "avg_reward": 935.38,
+        "avg_length": 133.84,
+        "win_rate": 0.85,
+        "epsilon": 0.01803000000000001,
+        "time": 1124.0506339073181
+    },
+    {
+        "episode": 9500,
+        "avg_reward": 1021.02,
+        "avg_length": 122.55,
+        "win_rate": 0.91,
+        "epsilon": 0.015030000000000009,
+        "time": 1133.0985028743744
+    },
+    {
+        "episode": 9600,
+        "avg_reward": 901.85,
+        "avg_length": 131.22,
+        "win_rate": 0.83,
+        "epsilon": 0.012030000000000008,
+        "time": 1142.3435320854187
+    },
+    {
+        "episode": 9700,
+        "avg_reward": 939.77,
+        "avg_length": 132.18,
+        "win_rate": 0.85,
+        "epsilon": 0.01,
+        "time": 1152.154348373413
+    },
+    {
+        "episode": 9800,
+        "avg_reward": 982.42,
+        "avg_length": 106.77,
+        "win_rate": 0.88,
+        "epsilon": 0.01,
+        "time": 1160.278084039688
+    },
+    {
+        "episode": 9900,
+        "avg_reward": 889.39,
+        "avg_length": 138.94,
+        "win_rate": 0.82,
+        "epsilon": 0.01,
+        "time": 1170.0188043117523
+    },
+    {
+        "episode": 10000,
+        "avg_reward": 986.43,
+        "avg_length": 133.1,
+        "win_rate": 0.88,
+        "epsilon": 0.0,
+        "time": 1179.7421400547028
+    }
+]
