@@ -375,7 +375,7 @@ class MarkovChainExtractor:
             print(f"   Trayectorias recolectadas: {len(self.trajectories)}")
             
             # Estados más visitados
-            print(f"\n🔝 ESTADOS MÁS VISITADOS:")
+            print(f"\n ESTADOS MÁS VISITADOS:")
             sorted_states = sorted(self.state_visits.items(), key=lambda x: -x[1])[:5]
             for state, visits in sorted_states:
                 print(f"   {state}: {visits} visitas")
@@ -405,7 +405,7 @@ class MarkovChainExtractor:
             sys.stdout.flush()
             
         except Exception as e:
-            print(f"\n✗ Error en print_summary: {e}")
+            print(f"\n Error en print_summary: {e}")
             import traceback
             traceback.print_exc()
             sys.stdout.flush()
@@ -427,11 +427,11 @@ def load_agent(filename):
                 agent.qValues = Counter()
                 agent.qValues.update(data['qValues'])
         
-        print(f"✓ Agente cargado desde {filename}")
+        print(f" Agente cargado desde {filename}")
         return agent
         
     except Exception as e:
-        print(f"✗ Error al cargar agente: {e}")
+        print(f" Error al cargar agente: {e}")
         return None
 
 
@@ -465,7 +465,7 @@ def main():
     try:
         extractor.print_summary()
     except Exception as e:
-        print(f"\n✗ Error en print_summary: {e}")
+        print(f"\n Error en print_summary: {e}")
         import traceback
         traceback.print_exc()
     
