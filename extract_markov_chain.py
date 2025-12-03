@@ -76,7 +76,7 @@ class MarkovChainExtractor:
                 print(f"  Episodios completados: {episode + 1}/{num_episodes}")
         
         if verbose:
-            print(f"✓ Recolectadas {len(self.trajectories)} trayectorias")
+            print(f"  Recolectadas {len(self.trajectories)} trayectorias")
             print(f"  Estados únicos visitados: {len(self.state_visits)}")
             print(f"  Estados terminales (victoria): {len(self.winning_states)}")
             print(f"  Estados terminales (derrota): {len(self.losing_states)}")
@@ -502,7 +502,7 @@ def main():
             for i, state in enumerate(states):
                 writer.writerow([i, str(state)])
         
-        print(f"✓ Matriz de transición exportada a {args.csv}")
+        print(f" Matriz de transición exportada a {args.csv}")
     
     print("\n Para usar los datos en Python:")
     print(f"   import pickle")
