@@ -6,6 +6,7 @@ import sys
 import os
 import time
 import pickle
+import json
 
 # Configurar paths correctamente
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -75,6 +76,7 @@ class QLearningTrainer:
         self.episode_lengths = []
         self.wins = 0
         self.losses = 0
+        self.training_history = []
         
     def train(self, verbose=True, render_every=0, save_every=100, save_path=None):
         """
@@ -90,6 +92,7 @@ class QLearningTrainer:
             dict: Estadísticas del entrenamiento
         """
         start_time = time.time()
+        last_wins = 0
         
         for episode in range(self.num_episodes):
             # Decay de epsilon (exploración -> explotación)
@@ -144,24 +147,51 @@ class QLearningTrainer:
                 self.wins += 1
             elif info.get('lose', False):
                 self.losses += 1
-            
-            # Mostrar progreso
-            if verbose and (episode + 1) % 100 == 0:
+            # Registrar historial y mostrar progreso cada 100 episodios
+            if (episode + 1) % 100 == 0:
                 avg_reward = sum(self.episode_rewards[-100:]) / min(100, len(self.episode_rewards[-100:]))
                 avg_length = sum(self.episode_lengths[-100:]) / min(100, len(self.episode_lengths[-100:]))
                 elapsed = time.time() - start_time
                 
-                print(f"Episodio {episode + 1}/{self.num_episodes}")
-                print(f"  Recompensa promedio (últimos 100): {avg_reward:.2f}")
-                print(f"  Duración promedio (últimos 100): {avg_length:.1f}")
-                print(f"  Victorias: {self.wins}, Derrotas: {self.losses}")
-                print(f"  Epsilon actual: {self.agent.epsilon:.3f}")
-                print(f"  Tiempo transcurrido: {elapsed:.1f}s")
+                # Calcular win rate del bloque actual
+                current_wins = self.wins - last_wins
+                epoch_win_rate = current_wins / 100.0
+                last_wins = self.wins
                 
-                if hasattr(self.agent, 'qValues'):
-                    print(f"  Estados-acciones en Q-table: {len(self.agent.qValues)}")
-                elif hasattr(self.agent, 'weights'):
-                    print(f"  Características aprendidas: {len(self.agent.weights)}")
+                # Guardar en historial
+                history_entry = {
+                    'episode': episode + 1,
+                    'avg_reward': avg_reward,
+                    'avg_length': avg_length,
+                    'win_rate': epoch_win_rate,
+                    'epsilon': self.agent.epsilon,
+                    'time': elapsed
+                }
+                self.training_history.append(history_entry)
+                
+                # Guardar archivo de historial si hay save_path
+                if save_path:
+                    history_path = f"{save_path}_history.json"
+                    try:
+                        with open(history_path, 'w') as f:
+                            json.dump(self.training_history, f, indent=4)
+                    except Exception as e:
+                        print(f"Error guardando historial: {e}")
+
+                if verbose:
+                    print(f"Episodio {episode + 1}/{self.num_episodes}")
+                    print(f"  Recompensa promedio (últimos 100): {avg_reward:.2f}")
+                    print(f"  Duración promedio (últimos 100): {avg_length:.1f}")
+                    print(f"  Tasa de victorias (últimos 100): {epoch_win_rate*100:.1f}%")
+                    print(f"  Victorias totales: {self.wins}, Derrotas totales: {self.losses}")
+                    print(f"  Epsilon actual: {self.agent.epsilon:.3f}")
+                    print(f"  Tiempo transcurrido: {elapsed:.1f}s")
+                    
+                    if hasattr(self.agent, 'qValues'):
+                        print(f"  Estados-acciones en Q-table: {len(self.agent.qValues)}")
+                    elif hasattr(self.agent, 'weights'):
+                        print(f"  Características aprendidas: {len(self.agent.weights)}")
+                        print(f"  Características aprendidas: {len(self.agent.weights)}")
                 print()
             
             # Guardar checkpoint

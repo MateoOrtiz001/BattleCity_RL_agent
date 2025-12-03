@@ -146,31 +146,38 @@ def draw_game_enhanced(screen, game_state, action=None, step=0, reward=0, font=N
     # Panel de información en la parte inferior
     panel_y = size * TILE_SIZE
     panel_height = 60
-    pygame.draw.rect(screen, (40, 40, 50), (0, panel_y, size * TILE_SIZE, panel_height))
-    
+    window_width = screen.get_width()
+    pygame.draw.rect(screen, (40, 40, 50), (0, panel_y, window_width, panel_height))
+
     if font is None:
         font = pygame.font.SysFont(None, 24)
-    
+
     # Información de la partida
     action_text = action.replace('_', ' ').title() if action else "---"
     enemies_alive = sum(1 for t in game_state.getTeamBTanks() if t.isAlive())
-    
+
     texts = [
         f"Paso: {step}",
-        f"Acción: {action_text}",
+        f"A: {action_text}",
         f"Enemigos: {enemies_alive}",
-        f"Recompensa: {reward:+.1f}"
+        f"R: {reward:+.1f}"
     ]
-    
+
+    # Distribuir los textos de forma equidistante en el ancho de la ventana
+    n_texts = len(texts)
+    margin = 20
+    available_width = window_width - 2 * margin
+    spacing = available_width // n_texts
     for i, text in enumerate(texts):
         surf = font.render(text, True, (255, 255, 255))
-        screen.blit(surf, (10 + i * 150, panel_y + 10))
-    
+        x_pos = margin + i * spacing
+        screen.blit(surf, (x_pos, panel_y + 10))
+
     # Instrucciones
     help_text = "ESC: Salir | SPACE: Pausar | +/-: Velocidad"
     help_surf = font.render(help_text, True, (150, 150, 150))
-    screen.blit(help_surf, (10, panel_y + 35))
-    
+    screen.blit(help_surf, (margin, panel_y + 35))
+
     pygame.display.flip()
 
 
@@ -232,12 +239,15 @@ def play_game_pygame(agent, env, delay_ms=150, level=1):
     
     # Configurar ventana
     board_size = game_state.getBoardSize()
-    window_width = board_size * TILE_SIZE
-    window_height = board_size * TILE_SIZE + 60  # Panel info adicional
-    
+    # Ajustar tamaño mínimo para que el panel inferior siempre se vea
+    min_panel_height = 80
+    min_width = 500
+    window_width = max(board_size * TILE_SIZE, min_width)
+    window_height = board_size * TILE_SIZE + min_panel_height
+
     screen = pygame.display.set_mode((window_width, window_height))
     pygame.display.set_caption(f"BattleCity RL - Nivel {level}")
-    
+
     font = pygame.font.SysFont(None, 24)
     clock = pygame.time.Clock()
     
@@ -311,9 +321,9 @@ def play_game_pygame(agent, env, delay_ms=150, level=1):
         'reward': env.episode_rewards
     }
     
+    next_game = False
     if running:
         draw_result_screen(screen, result['win'], result['steps'], result['reward'], font)
-        
         # Esperar input del usuario
         waiting = True
         while waiting:
@@ -324,12 +334,82 @@ def play_game_pygame(agent, env, delay_ms=150, level=1):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         waiting = False
+                        next_game = True
                     elif event.key == pygame.K_ESCAPE:
                         waiting = False
                         running = False
             clock.tick(30)
-    
-    return result, running
+    # Si next_game es True, reiniciar el entorno y volver a jugar
+    while running and next_game:
+        env = BattleCityEnvironment(level=level)
+        state = env.reset()
+        game_state = env.game_state
+        draw_game_enhanced(screen, game_state, None, env.steps, env.episode_rewards, font)
+        pygame.time.delay(500)
+        done = False
+        paused = False
+        last_action = None
+        current_delay = delay_ms
+        info = {}
+        while running and not done:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                    elif event.key == pygame.K_SPACE:
+                        paused = not paused
+                    elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS:
+                        current_delay = max(50, current_delay - 50)
+                    elif event.key == pygame.K_MINUS:
+                        current_delay = min(1000, current_delay + 50)
+            if paused:
+                pause_surf = font.render("PAUSADO", True, (255, 255, 0))
+                pause_rect = pause_surf.get_rect(center=(screen.get_width()//2, 30))
+                screen.blit(pause_surf, pause_rect)
+                pygame.display.flip()
+                pygame.time.Clock().tick(10)
+                continue
+            legal_actions = env.get_legal_actions(0)
+            if not legal_actions:
+                break
+            agent.actionFn = lambda s: legal_actions
+            action = agent.getPolicy(state)
+            if action is None:
+                action = legal_actions[0] if legal_actions else None
+            if action is None:
+                break
+            next_state, reward, done, info = env.step(action)
+            state = next_state
+            last_action = action
+            draw_game_enhanced(screen, env.game_state, action, env.steps, env.episode_rewards, font)
+            pygame.time.delay(current_delay)
+            pygame.time.Clock().tick(60)
+        result = {
+            'win': info.get('win', False),
+            'lose': info.get('lose', False),
+            'steps': env.steps,
+            'reward': env.episode_rewards
+        }
+        draw_result_screen(screen, result['win'], result['steps'], result['reward'], font)
+        # Esperar input del usuario
+        waiting = True
+        next_game = False
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        waiting = False
+                        next_game = True
+                    elif event.key == pygame.K_ESCAPE:
+                        waiting = False
+                        running = False
+            pygame.time.Clock().tick(30)
+    return result, running, next_game
 
 
 def render_game_text(env, clear_screen=True):
@@ -443,11 +523,11 @@ def play_game_text(agent, env, delay=0.2):
     render_game_text(env, clear_screen=False)
     print("\n" + "=" * 40)
     if result['win']:
-        print("🎉 ¡VICTORIA!")
+        print("¡VICTORIA!")
     elif result['lose']:
-        print("💀 DERROTA")
+        print("DERROTA")
     else:
-        print("⏱️ TIEMPO AGOTADO")
+        print("TIEMPO AGOTADO")
     print(f"Pasos: {result['steps']}, Recompensa: {result['reward']:.1f}")
     print("=" * 40)
     
@@ -491,38 +571,63 @@ def main():
                 print(f"\n{'='*40}")
                 print(f"PARTIDA {game_num + 1} de {args.games}")
                 print('='*40)
-            
             try:
                 result = play_game_text(agent, env, delay=args.delay/1000)
                 if result['win']:
                     wins += 1
                 total_steps += result['steps']
                 total_reward += result['reward']
-                
                 if args.games > 1 and game_num < args.games - 1:
                     input("\nPresiona Enter para la siguiente partida...")
-                    
             except KeyboardInterrupt:
-                print("\n\n⏹️ Partida interrumpida.")
+                print("\n\n Partida interrumpida.")
                 break
     else:
         # Modo pygame
         running = True
-        for game_num in range(args.games):
-            if not running:
-                break
-            
-            try:
-                result, running = play_game_pygame(agent, env, delay_ms=args.delay, level=args.level)
+        first_game = True
+        game_num = 0
+        # Pantalla de carga inicial
+        pygame.init()
+        min_width = 500
+        min_panel_height = 80
+        window_width = min_width
+        window_height = min_width // 2 + min_panel_height
+        screen = pygame.display.set_mode((window_width, window_height))
+        pygame.display.set_caption("BattleCity RL - Cargando...")
+        font = pygame.font.SysFont(None, 36)
+        screen.fill((30, 30, 40))
+        loading_text = "Cargando partida..."
+        surf = font.render(loading_text, True, (255, 255, 255))
+        rect = surf.get_rect(center=(window_width//2, window_height//2 - 20))
+        screen.blit(surf, rect)
+        countdown = 10
+        for i in range(countdown, 0, -1):
+            timer_text = f"Comenzando en {i} segundos..."
+            timer_surf = font.render(timer_text, True, (200, 200, 100))
+            timer_rect = timer_surf.get_rect(center=(window_width//2, window_height//2 + 30))
+            screen.blit(timer_surf, timer_rect)
+            pygame.display.flip()
+            time.sleep(1)
+            # Limpiar timer
+            pygame.draw.rect(screen, (30, 30, 40), timer_rect)
+        pygame.display.set_caption(f"BattleCity RL - Nivel {args.level}")
+        try:
+            while running and (game_num < args.games):
+                result, running, next_game = play_game_pygame(agent, env, delay_ms=args.delay, level=args.level)
                 if result['win']:
                     wins += 1
                 total_steps += result['steps']
                 total_reward += result['reward']
-                
-            except KeyboardInterrupt:
-                print("\n\n⏹️ Partida interrumpida.")
-                break
-        
+                game_num += 1
+                if not running:
+                    break
+                if next_game:
+                    continue
+                else:
+                    break
+        except KeyboardInterrupt:
+            print("\n\n⏹️ Partida interrumpida.")
         # Cerrar pygame
         try:
             pygame.quit()

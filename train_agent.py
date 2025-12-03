@@ -49,7 +49,7 @@ def train_basic_agent():
     
     stats = trainer.train(
         verbose=True,
-        save_every=200,
+        save_every=1000,
         save_path='models/qlearning_basic'
     )
     
