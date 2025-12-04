@@ -127,9 +127,24 @@ class MarkovChainExtractor:
                 # IMPORTANTE: Registrar visita al estado terminal para que aparezca en la matriz
                 self.state_visits[next_state] += 1
                 
-                if info.get('win', False):
+                is_win = info.get('win', False)
+                is_lose = info.get('lose', False)
+                
+                # --- CORRECCIÓN HEURÍSTICA ---
+                # Si el entorno no marcó win/lose, verificamos el estado manualmente
+                # Estructura: (health, enemy_pos, enemy_health, base_destroyed, ...)
+                if not is_win and not is_lose and isinstance(next_state, tuple) and len(next_state) >= 4:
+                    # 1. Verificar Base Destruida (índice 3)
+                    if next_state[3] is True:
+                        is_lose = True
+                    # 2. Verificar Vida del Jugador (índice 0)
+                    elif next_state[0] <= 0:
+                        is_lose = True
+                # -----------------------------
+                
+                if is_win:
                     self.winning_states.add(next_state)
-                elif info.get('lose', False):
+                elif is_lose:
                     self.losing_states.add(next_state)
             
             state = next_state
@@ -442,184 +457,3 @@ def load_agent(filename):
     except Exception as e:
         print(f" Error al cargar agente: {e}")
         return None
-
-
-def main():
-    parser = argparse.ArgumentParser(description='Extraer cadena de Markov de política')
-    parser.add_argument('--agent', type=str, default='models/qlearning_basic_final.pkl',
-                        help='Ruta al archivo del agente')
-    parser.add_argument('--level', type=int, default=1, help='Nivel del juego')
-    parser.add_argument('--episodes', type=int, default=200, 
-                        help='Episodios para estimar transiciones')
-    parser.add_argument('--output', type=str, default='markov_chain_data.pkl',
-                        help='Archivo de salida')
-    parser.add_argument('--csv', type=str, default=None,
-                        help='Exportar matriz de transición a CSV')
-    
-    args = parser.parse_args()
-    
-    # Cargar agente
-    agent = load_agent(args.agent)
-    if agent is None:
-        return
-    
-    # Crear entorno
-    env = BattleCityEnvironment(level=args.level)
-    
-    # Extraer cadena de Markov
-    extractor = MarkovChainExtractor(agent, env)
-    extractor.collect_trajectories(num_episodes=args.episodes)
-    
-    # Mostrar resumen
-    try:
-        extractor.print_summary()
-    except Exception as e:
-        print(f"\n Error en print_summary: {e}")
-        import traceback
-        traceback.print_exc()
-    
-    # Exportar datos
-    try:
-        data = extractor.export_to_dict()
-        
-        # --- NUEVO: Ejecutar análisis avanzados ---
-        states, P = extractor.get_transition_matrix()
-        _, R = extractor.get_reward_matrix()
-        
-        # 1. Análisis Fundamental (Win Rate, Expected Steps)
-        fundamental_data = compute_fundamental_matrix_analysis(
-            states, P, 
-            extractor.terminal_states, 
-            extractor.winning_states
-        )
-        if fundamental_data:
-            # Convertir claves a string para JSON/Pickle
-            data['fundamental_analysis'] = {str(k): v for k, v in fundamental_data.items()}
-            
-            # Imprimir algunos insights
-            start_state = states[0] if len(states) > 0 else None # Asumimos el primero o buscamos uno inicial
-            # Buscar estado inicial real (el que tiene visitas pero nadie entra? o simplemente el primero de la trayectoria)
-            if extractor.trajectories:
-                start_state = extractor.trajectories[0][0]['state']
-            
-            if start_state and start_state in fundamental_data:
-                info = fundamental_data[start_state]
-                print(f"\n INSIGHTS DESDE ESTADO INICIAL:")
-                print(f"   Probabilidad de Victoria: {info['win_probability']*100:.1f}%")
-                print(f"   Pasos esperados para terminar: {info['expected_steps_to_end']:.1f}")
-
-        # 2. Análisis de Riesgo
-        risk_data = compute_risk_analysis(states, P, R)
-        data['risk_analysis'] = {str(k): v for k, v in risk_data.items()}
-        
-        # 3. Clustering
-        cluster_data = compute_state_clustering(states, P)
-        if cluster_data:
-            data['clustering'] = {str(k): v for k, v in cluster_data.items()}
-            
-        # 4. Análisis Espectral (Mixing Times / Relaxation)
-        spectral_data = compute_spectral_analysis(states, P, extractor.terminal_states)
-        if spectral_data:
-            data['spectral_analysis'] = spectral_data
-        
-        # ------------------------------------------
-        
-        with open(args.output, 'wb') as f:
-            pickle.dump(data, f)
-        print(f"\n Datos guardados en {args.output}")
-        
-        # Exportar CSV extendido si se solicita
-        if args.csv:
-            base_name = args.csv.replace('.csv', '')
-            
-            # Guardar análisis detallado por estado
-            with open(f"{base_name}_analysis.csv", 'w', newline='') as f:
-                import csv
-                fieldnames = ['state_idx', 'state_str', 'visits', 'win_prob', 'expected_steps', 
-                              'expected_reward', 'reward_std', 'cluster', 'pca_x', 'pca_y']
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-                
-                for i, state in enumerate(states):
-                    row = {
-                        'state_idx': i,
-                        'state_str': str(state),
-                        'visits': extractor.state_visits[state]
-                    }
-                    
-                    # Agregar datos fundamentales
-                    if fundamental_data and state in fundamental_data:
-                        row['win_prob'] = f"{fundamental_data[state]['win_probability']:.4f}"
-                        row['expected_steps'] = f"{fundamental_data[state]['expected_steps_to_end']:.2f}"
-                    
-                    # Agregar datos de riesgo
-                    if risk_data and state in risk_data:
-                        row['expected_reward'] = f"{risk_data[state]['expected_reward']:.4f}"
-                        row['reward_std'] = f"{risk_data[state]['reward_std']:.4f}"
-                        
-                    # Agregar datos de clustering
-                    if cluster_data and state in cluster_data:
-                        row['cluster'] = cluster_data[state]['cluster']
-                        row['pca_x'] = f"{cluster_data[state]['pca_x']:.4f}"
-                        row['pca_y'] = f"{cluster_data[state]['pca_y']:.4f}"
-                        
-                    writer.writerow(row)
-            print(f"✓ Análisis detallado exportado a {base_name}_analysis.csv")
-
-    except Exception as e:
-        print(f"\n Error al exportar datos: {e}")
-        import traceback
-        traceback.print_exc()
-        return 1
-    
-    # Exportar a CSV si se solicita
-    if args.csv:
-        states, P = extractor.get_transition_matrix()
-        
-        # Guardar matriz de transición
-        import csv
-        with open(args.csv, 'w', newline='') as f:
-            writer = csv.writer(f)
-            # Header con índices de estados
-            writer.writerow([''] + list(range(len(states))))
-            for i, row in enumerate(P):
-                writer.writerow([i] + list(row))
-        
-        # Guardar mapeo de estados
-        with open(args.csv.replace('.csv', '_states.csv'), 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['index', 'state'])
-            for i, state in enumerate(states):
-                writer.writerow([i, str(state)])
-        
-        print(f" Matriz de transición exportada a {args.csv}")
-    
-    print("\n Para usar los datos en Python:")
-    print(f"   import pickle")
-    print(f"   with open('{args.output}', 'rb') as f:")
-    print(f"       data = pickle.load(f)")
-    print(f"   P = data['transition_matrix']  # Matriz de transición")
-    print(f"   R = data['reward_matrix']      # Matriz de recompensas")
-    print(f"   pi = data['stationary_distribution']  # Dist. estacionaria")
-    
-    # Limpiar pygame
-    try:
-        import pygame
-        pygame.quit()
-    except:
-        pass
-    
-    return 0
-
-
-if __name__ == '__main__':
-    try:
-        exit_code = main()
-        sys.exit(exit_code if exit_code else 0)
-    except SystemExit:
-        pass
-    except Exception as e:
-        print(f"Error fatal: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
