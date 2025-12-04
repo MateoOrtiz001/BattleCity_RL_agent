@@ -124,6 +124,9 @@ class MarkovChainExtractor:
             # Marcar estados terminales
             if done:
                 self.terminal_states.add(next_state)
+                # IMPORTANTE: Registrar visita al estado terminal para que aparezca en la matriz
+                self.state_visits[next_state] += 1
+                
                 if info.get('win', False):
                     self.winning_states.add(next_state)
                 elif info.get('lose', False):
@@ -141,6 +144,11 @@ class MarkovChainExtractor:
             states: Lista de estados
             P: Matriz de transición numpy (n_states x n_states)
         """
+        # Asegurar consistencia: estados terminales deben estar en state_visits
+        for s in self.terminal_states:
+            if s not in self.state_visits:
+                self.state_visits[s] = 1
+
         states = list(self.state_visits.keys())
         n_states = len(states)
         state_to_idx = {s: i for i, s in enumerate(states)}
@@ -411,6 +419,7 @@ class MarkovChainExtractor:
             sys.stdout.flush()
 
 
+
 def load_agent(filename):
     """Carga un agente desde archivo."""
     try:
@@ -473,9 +482,90 @@ def main():
     try:
         data = extractor.export_to_dict()
         
+        # --- NUEVO: Ejecutar análisis avanzados ---
+        states, P = extractor.get_transition_matrix()
+        _, R = extractor.get_reward_matrix()
+        
+        # 1. Análisis Fundamental (Win Rate, Expected Steps)
+        fundamental_data = compute_fundamental_matrix_analysis(
+            states, P, 
+            extractor.terminal_states, 
+            extractor.winning_states
+        )
+        if fundamental_data:
+            # Convertir claves a string para JSON/Pickle
+            data['fundamental_analysis'] = {str(k): v for k, v in fundamental_data.items()}
+            
+            # Imprimir algunos insights
+            start_state = states[0] if len(states) > 0 else None # Asumimos el primero o buscamos uno inicial
+            # Buscar estado inicial real (el que tiene visitas pero nadie entra? o simplemente el primero de la trayectoria)
+            if extractor.trajectories:
+                start_state = extractor.trajectories[0][0]['state']
+            
+            if start_state and start_state in fundamental_data:
+                info = fundamental_data[start_state]
+                print(f"\n INSIGHTS DESDE ESTADO INICIAL:")
+                print(f"   Probabilidad de Victoria: {info['win_probability']*100:.1f}%")
+                print(f"   Pasos esperados para terminar: {info['expected_steps_to_end']:.1f}")
+
+        # 2. Análisis de Riesgo
+        risk_data = compute_risk_analysis(states, P, R)
+        data['risk_analysis'] = {str(k): v for k, v in risk_data.items()}
+        
+        # 3. Clustering
+        cluster_data = compute_state_clustering(states, P)
+        if cluster_data:
+            data['clustering'] = {str(k): v for k, v in cluster_data.items()}
+            
+        # 4. Análisis Espectral (Mixing Times / Relaxation)
+        spectral_data = compute_spectral_analysis(states, P, extractor.terminal_states)
+        if spectral_data:
+            data['spectral_analysis'] = spectral_data
+        
+        # ------------------------------------------
+        
         with open(args.output, 'wb') as f:
             pickle.dump(data, f)
         print(f"\n Datos guardados en {args.output}")
+        
+        # Exportar CSV extendido si se solicita
+        if args.csv:
+            base_name = args.csv.replace('.csv', '')
+            
+            # Guardar análisis detallado por estado
+            with open(f"{base_name}_analysis.csv", 'w', newline='') as f:
+                import csv
+                fieldnames = ['state_idx', 'state_str', 'visits', 'win_prob', 'expected_steps', 
+                              'expected_reward', 'reward_std', 'cluster', 'pca_x', 'pca_y']
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                
+                for i, state in enumerate(states):
+                    row = {
+                        'state_idx': i,
+                        'state_str': str(state),
+                        'visits': extractor.state_visits[state]
+                    }
+                    
+                    # Agregar datos fundamentales
+                    if fundamental_data and state in fundamental_data:
+                        row['win_prob'] = f"{fundamental_data[state]['win_probability']:.4f}"
+                        row['expected_steps'] = f"{fundamental_data[state]['expected_steps_to_end']:.2f}"
+                    
+                    # Agregar datos de riesgo
+                    if risk_data and state in risk_data:
+                        row['expected_reward'] = f"{risk_data[state]['expected_reward']:.4f}"
+                        row['reward_std'] = f"{risk_data[state]['reward_std']:.4f}"
+                        
+                    # Agregar datos de clustering
+                    if cluster_data and state in cluster_data:
+                        row['cluster'] = cluster_data[state]['cluster']
+                        row['pca_x'] = f"{cluster_data[state]['pca_x']:.4f}"
+                        row['pca_y'] = f"{cluster_data[state]['pca_y']:.4f}"
+                        
+                    writer.writerow(row)
+            print(f"✓ Análisis detallado exportado a {base_name}_analysis.csv")
+
     except Exception as e:
         print(f"\n Error al exportar datos: {e}")
         import traceback
