@@ -209,20 +209,32 @@ class MarkovChainExtractor:
     
     def get_transition_matrix_with_timeout(self):
         """
-        Construye la matriz de transición P(s'|s) bajo la política.
+        Construye la matriz de transición P(s'|s) incluyendo un estado TIMEOUT absorbente.
+        
+        Útil para calcular tiempos esperados de absorción (que requieren que todos
+        los estados transitorios tengan camino a algún estado absorbente).
+        
         Returns:
-            states: Lista de estados
+            states: Lista de estados (incluyendo 'TIMEOUT')
             P: Matriz de transición numpy (n_states x n_states)
-
+            terminal_states_with_timeout: Set de estados terminales incluyendo TIMEOUT
         """
         # Asegurar consistencia: estados terminales deben estar en state_visits
         for s in self.terminal_states:
             if s not in self.state_visits:
                 self.state_visits[s] = 1
 
-        states = list(self.state_visits.keys())
+        # Crear lista de estados base
+        base_states = list(self.state_visits.keys())
+        
+        # Agregar estado TIMEOUT al final
+        timeout_state = 'TIMEOUT'
+        states = base_states + [timeout_state]
+        
         n_states = len(states)
         state_to_idx = {s: i for i, s in enumerate(states)}
+        timeout_idx = state_to_idx[timeout_state]
+        
         P = np.zeros((n_states, n_states))
 
         for state, next_state_counts in self.transition_counts.items():
@@ -232,10 +244,27 @@ class MarkovChainExtractor:
             total = sum(next_state_counts.values())
 
             for next_state, count in next_state_counts.items():
-                if next_state in state_to_idx:
+                # Si el siguiente estado es un estado de timeout, redirigir a TIMEOUT
+                if next_state in self.timeout_states:
+                    P[i, timeout_idx] += count / total
+                elif next_state in state_to_idx:
                     j = state_to_idx[next_state]
                     P[i, j] = count / total
-        return states, P
+        
+        # Hacer TIMEOUT absorbente (P[timeout, timeout] = 1)
+        P[timeout_idx, timeout_idx] = 1.0
+        
+        # Hacer estados de victoria y derrota absorbentes también
+        for s in self.terminal_states:
+            if s in state_to_idx:
+                idx = state_to_idx[s]
+                P[idx, :] = 0
+                P[idx, idx] = 1.0
+        
+        # Estados terminales incluyendo TIMEOUT
+        terminal_with_timeout = self.terminal_states | {timeout_state}
+        
+        return states, P, terminal_with_timeout
     
     def get_reward_matrix(self):
         """
