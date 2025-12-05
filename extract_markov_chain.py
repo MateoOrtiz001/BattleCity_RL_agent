@@ -134,10 +134,6 @@ class MarkovChainExtractor:
             
             # Marcar estados terminales
             if done:
-                self.terminal_states.add(next_state)
-                # IMPORTANTE: Registrar visita al estado terminal para que aparezca en la matriz
-                self.state_visits[next_state] += 1
-                
                 is_win = info.get('win', False)
                 is_lose = info.get('lose', False)
                 
@@ -157,7 +153,14 @@ class MarkovChainExtractor:
                         is_lose = True
                 # -----------------------------
                 
-                # Registrar resultado del episodio
+                # Solo marcar como estado terminal/absorbente si es victoria o derrota real
+                # Los timeouts NO deben ser estados absorbentes en la cadena de Markov
+                if is_win or is_lose:
+                    self.terminal_states.add(next_state)
+                    # Registrar visita al estado terminal para que aparezca en la matriz
+                    self.state_visits[next_state] += 1
+                
+                # Registrar resultado del episodio (para estadísticas)
                 if is_win:
                     self.winning_states.add(next_state)
                     self.episode_results['win'] += 1
