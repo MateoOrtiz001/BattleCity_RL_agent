@@ -61,6 +61,9 @@ class MarkovChainExtractor:
         # Trayectorias recolectadas
         self.trajectories = []
         
+        # Contadores de resultados de episodios (para verificación)
+        self.episode_results = {'win': 0, 'lose': 0, 'other': 0}
+        
     def collect_trajectories(self, num_episodes=100, verbose=True):
         """
         Recolecta trayectorias siguiendo la política del agente.
@@ -76,10 +79,18 @@ class MarkovChainExtractor:
                 print(f"  Episodios completados: {episode + 1}/{num_episodes}")
         
         if verbose:
-            print(f"  Recolectadas {len(self.trajectories)} trayectorias")
+            total_eps = len(self.trajectories)
+            print(f"\n  Recolectadas {total_eps} trayectorias")
             print(f"  Estados únicos visitados: {len(self.state_visits)}")
-            print(f"  Estados terminales (victoria): {len(self.winning_states)}")
-            print(f"  Estados terminales (derrota): {len(self.losing_states)}")
+            print(f"\n  === RESULTADOS DE EPISODIOS (simulación real) ===")
+            print(f"  Victorias:  {self.episode_results['win']} ({100*self.episode_results['win']/total_eps:.1f}%)")
+            print(f"  Derrotas:   {self.episode_results['lose']} ({100*self.episode_results['lose']/total_eps:.1f}%)")
+            print(f"  Otros/Timeout: {self.episode_results['other']} ({100*self.episode_results['other']/total_eps:.1f}%)")
+            print(f"\n  === ESTADOS TERMINALES ÚNICOS ===")
+            print(f"  Estados de victoria: {len(self.winning_states)}")
+            print(f"  Estados de derrota:  {len(self.losing_states)}")
+            other_terminal = len(self.terminal_states) - len(self.winning_states) - len(self.losing_states)
+            print(f"  Estados otros:       {other_terminal}")
     
     def _run_episode(self):
         """Ejecuta un episodio y registra las transiciones."""
@@ -146,10 +157,15 @@ class MarkovChainExtractor:
                         is_lose = True
                 # -----------------------------
                 
+                # Registrar resultado del episodio
                 if is_win:
                     self.winning_states.add(next_state)
+                    self.episode_results['win'] += 1
                 elif is_lose:
                     self.losing_states.add(next_state)
+                    self.episode_results['lose'] += 1
+                else:
+                    self.episode_results['other'] += 1
             
             state = next_state
         
