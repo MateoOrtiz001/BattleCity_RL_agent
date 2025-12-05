@@ -54,9 +54,10 @@ class MarkovChainExtractor:
         self.reward_counts = defaultdict(int)          # Conteo de (s, a, s')
         
         # Estados terminales
-        self.terminal_states = set()
+        self.terminal_states = set()  # Solo victoria/derrota (para análisis de probabilidades)
         self.winning_states = set()
         self.losing_states = set()
+        self.timeout_states = set()  # Estados donde ocurrió timeout (para análisis de tiempos)
         
         # Trayectorias recolectadas
         self.trajectories = []
@@ -85,12 +86,11 @@ class MarkovChainExtractor:
             print(f"\n  === RESULTADOS DE EPISODIOS (simulación real) ===")
             print(f"  Victorias:  {self.episode_results['win']} ({100*self.episode_results['win']/total_eps:.1f}%)")
             print(f"  Derrotas:   {self.episode_results['lose']} ({100*self.episode_results['lose']/total_eps:.1f}%)")
-            print(f"  Otros/Timeout: {self.episode_results['other']} ({100*self.episode_results['other']/total_eps:.1f}%)")
+            print(f"  Timeout:    {self.episode_results['other']} ({100*self.episode_results['other']/total_eps:.1f}%)")
             print(f"\n  === ESTADOS TERMINALES ÚNICOS ===")
-            print(f"  Estados de victoria: {len(self.winning_states)}")
-            print(f"  Estados de derrota:  {len(self.losing_states)}")
-            other_terminal = len(self.terminal_states) - len(self.winning_states) - len(self.losing_states)
-            print(f"  Estados otros:       {other_terminal}")
+            print(f"  Estados de victoria:  {len(self.winning_states)}")
+            print(f"  Estados de derrota:   {len(self.losing_states)}")
+            print(f"  Estados de timeout:   {len(self.timeout_states)}")
     
     def _run_episode(self):
         """Ejecuta un episodio y registra las transiciones."""
@@ -153,21 +153,22 @@ class MarkovChainExtractor:
                         is_lose = True
                 # -----------------------------
                 
-                # Solo marcar como estado terminal/absorbente si es victoria o derrota real
-                # Los timeouts NO deben ser estados absorbentes en la cadena de Markov
-                if is_win or is_lose:
-                    self.terminal_states.add(next_state)
-                    # Registrar visita al estado terminal para que aparezca en la matriz
-                    self.state_visits[next_state] += 1
-                
-                # Registrar resultado del episodio (para estadísticas)
+                # Marcar estados terminales
+                # terminal_states solo incluye victoria/derrota (para análisis de probabilidades)
+                # timeout_states guarda los timeouts por separado (para análisis de tiempos)
                 if is_win:
+                    self.terminal_states.add(next_state)
                     self.winning_states.add(next_state)
+                    self.state_visits[next_state] += 1
                     self.episode_results['win'] += 1
                 elif is_lose:
+                    self.terminal_states.add(next_state)
                     self.losing_states.add(next_state)
+                    self.state_visits[next_state] += 1
                     self.episode_results['lose'] += 1
                 else:
+                    # Es timeout - guardar para análisis de tiempos
+                    self.timeout_states.add(next_state)
                     self.episode_results['other'] += 1
             
             state = next_state
@@ -204,6 +205,36 @@ class MarkovChainExtractor:
                     j = state_to_idx[next_state]
                     P[i, j] = count / total
         
+        return states, P
+    
+    def get_transition_matrix_with_timeout(self):
+        """
+        Construye la matriz de transición P(s'|s) bajo la política.
+        Returns:
+            states: Lista de estados
+            P: Matriz de transición numpy (n_states x n_states)
+
+        """
+        # Asegurar consistencia: estados terminales deben estar en state_visits
+        for s in self.terminal_states:
+            if s not in self.state_visits:
+                self.state_visits[s] = 1
+
+        states = list(self.state_visits.keys())
+        n_states = len(states)
+        state_to_idx = {s: i for i, s in enumerate(states)}
+        P = np.zeros((n_states, n_states))
+
+        for state, next_state_counts in self.transition_counts.items():
+            if state not in state_to_idx:
+                continue
+            i = state_to_idx[state]
+            total = sum(next_state_counts.values())
+
+            for next_state, count in next_state_counts.items():
+                if next_state in state_to_idx:
+                    j = state_to_idx[next_state]
+                    P[i, j] = count / total
         return states, P
     
     def get_reward_matrix(self):
