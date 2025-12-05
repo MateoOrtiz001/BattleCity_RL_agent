@@ -261,8 +261,18 @@ class MarkovChainExtractor:
                 P[idx, :] = 0
                 P[idx, idx] = 1.0
         
-        # Estados terminales incluyendo TIMEOUT
+        # IMPORTANTE: Asegurar que todos los estados transitorios tengan transiciones válidas
+        # Si un estado no tiene transiciones de salida (suma de fila = 0), 
+        # enviarlo directamente a TIMEOUT
         terminal_with_timeout = self.terminal_states | {timeout_state}
+        for i, state in enumerate(states):
+            if state not in terminal_with_timeout:
+                row_sum = P[i, :].sum()
+                if row_sum < 0.001:  # Estado sin transiciones de salida
+                    P[i, timeout_idx] = 1.0
+                elif row_sum < 0.99:  # Estado con transiciones incompletas
+                    # Agregar la probabilidad faltante hacia TIMEOUT
+                    P[i, timeout_idx] += (1.0 - row_sum)
         
         return states, P, terminal_with_timeout
     
