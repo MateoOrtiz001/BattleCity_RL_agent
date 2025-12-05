@@ -132,12 +132,16 @@ class MarkovChainExtractor:
                 
                 # --- CORRECCIÓN HEURÍSTICA ---
                 # Si el entorno no marcó win/lose, verificamos el estado manualmente
-                # Estructura: (health, enemy_pos, enemy_health, base_destroyed, ...)
+                # Estructura: (health, enemy_pos, enemy_health, base_destroyed, peligro_dir, peligro_base)
                 if not is_win and not is_lose and isinstance(next_state, tuple) and len(next_state) >= 4:
-                    # 1. Verificar Base Destruida (índice 3)
-                    if next_state[3] is True:
+                    # 1. Verificar Victoria: todos los enemigos con salud 0 (índice 2)
+                    enemy_health = next_state[2]
+                    if isinstance(enemy_health, tuple) and all(h == 0 for h in enemy_health):
+                        is_win = True
+                    # 2. Verificar Base Destruida (índice 3)
+                    elif next_state[3] is True:
                         is_lose = True
-                    # 2. Verificar Vida del Jugador (índice 0)
+                    # 3. Verificar Vida del Jugador (índice 0)
                     elif next_state[0] <= 0:
                         is_lose = True
                 # -----------------------------
