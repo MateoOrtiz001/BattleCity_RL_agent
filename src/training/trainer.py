@@ -191,8 +191,7 @@ class QLearningTrainer:
                         print(f"  Estados-acciones en Q-table: {len(self.agent.qValues)}")
                     elif hasattr(self.agent, 'weights'):
                         print(f"  Características aprendidas: {len(self.agent.weights)}")
-                        print(f"  Características aprendidas: {len(self.agent.weights)}")
-                print()
+                    print()
             
             # Guardar checkpoint
             if save_path and save_every > 0 and (episode + 1) % save_every == 0:
