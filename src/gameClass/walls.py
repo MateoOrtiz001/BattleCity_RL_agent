@@ -21,6 +21,10 @@ class Wall():
     def getPosition(self):
         return self.position
     
+    def getPos(self):
+        """Alias de getPosition para consistencia con otras clases."""
+        return self.position
+    
     def getType(self):
         return self.wall_type
     

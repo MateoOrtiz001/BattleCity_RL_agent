@@ -1,9 +1,11 @@
-from ..utils import manhattanDistance, lookup
+from ..utils import manhattanDistance
 import time
 import threading
 import concurrent.futures
 import os
 import random
+
+from .base_search import BaseSearchAgent
 
 # Pre-import ReflexTankAgent to avoid import latency when used as fallback (first call can block GUI)
 try:
@@ -12,25 +14,12 @@ except Exception:
     ReflexTankAgent = None
 
 
-class MinimaxAgent():
+class MinimaxAgent(BaseSearchAgent):
     """
     Your minimax agent (question 2)
     """
-    def __init__(self, depth = '1', tankIndex = 0):
-        self.index = tankIndex  # Índice del tanque que controla este agente
-        self.depth = int(depth)  
-        self.expanded_nodes = 0
-        # Para permitir un corte por tiempo similar a AlphaBetaAgent
-        self.start_time = 0
-        self.time_limit = 1.0
-        
-    
-    def is_time_exceeded(self):
-        """Verifica si se ha excedido el límite de tiempo"""
-        return (
-            self.time_limit is not None
-            and (time.time() - self.start_time) > self.time_limit
-        )
+    def __init__(self, depth='1', tankIndex=0, time_limit=1.0):
+        super().__init__(depth=depth, tankIndex=tankIndex, time_limit=time_limit)
 
     def getAction(self, gameState):
         """Minimax search for multi-agent BattleCity.
@@ -40,17 +29,12 @@ class MinimaxAgent():
         (minimizers). Depth is counted in "full-turns": we increment the
         depth when we cycle back to the root agent.
         """
-        import time
-
+        self.reset_search()
         num_tanks = gameState.getNumAgents()
-
-        # Use the attribute 'index' if present, otherwise assume 0
-        root_index = getattr(self, 'index', 0)
-
-        self.start_time = time.time()
+        root_index = self.index
 
         def minimax(state, depth, agent_index):
-            self.expanded_nodes += 1
+            self.increment_nodes()
 
             # Terminal or max depth reached
             if depth >= self.depth or state.isTerminal() or self.is_time_exceeded():
@@ -64,7 +48,7 @@ class MinimaxAgent():
             if agent_index == root_index:
                 v = float('-inf')
                 for action in state.getLegalActions(agent_index):
-                    if time.time() - self.start_time > self.time_limit:
+                    if self.is_time_exceeded():
                         break
                     succ = state.getSuccessor(agent_index, action)
                     v = max(v, minimax(succ, next_depth, next_agent))
@@ -73,7 +57,7 @@ class MinimaxAgent():
                 # Minimizing adversary
                 v = float('inf')
                 for action in state.getLegalActions(agent_index):
-                    if time.time() - self.start_time > self.time_limit:
+                    if self.is_time_exceeded():
                         break
                     succ = state.getSuccessor(agent_index, action)
                     v = min(v, minimax(succ, next_depth, next_agent))
@@ -88,7 +72,7 @@ class MinimaxAgent():
 
         # Evaluate each root action
         for action in legal_actions:
-            if time.time() - self.start_time > self.time_limit:
+            if self.is_time_exceeded():
                 break
             succ = gameState.getSuccessor(root_index, action)
             score = minimax(succ, 0, (root_index + 1) % num_tanks)
@@ -96,56 +80,31 @@ class MinimaxAgent():
                 best_score = score
                 best_action = action
 
-        # Si se superó el tiempo, fallback a agente reflexivo 50/50 (offensive/defensive)
-        try:
-            if self.is_time_exceeded():
-                from .reflexAgent import ReflexTankAgent
-                rtype = 'offensive' if random.random() < 0.5 else 'defensive'
-                reflex = ReflexTankAgent(script_type=rtype)
-                try:
-                    elapsed = time.time() - self.start_time if self.start_time else 0.0
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time after {elapsed:.2f}s, nodes={getattr(self,'expanded_nodes',None)} -> ReflexTankAgent({rtype})")
-                except Exception:
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time -> ReflexTankAgent({rtype})")
-                return reflex.getAction(gameState)
-        except Exception:
-            pass
+        # Check for fallback
+        fallback = self.maybe_fallback(gameState)
+        if fallback is not None:
+            return fallback
 
         return best_action
 
-class AlphaBetaAgent():
+
+class AlphaBetaAgent(BaseSearchAgent):
     """
     Your minimax agent with alpha-beta pruning and iterative deepening for Battle City
     """
-    def __init__(self, depth = '1', tankIndex = 0, time_limit=1.0):
-        self.index = tankIndex  # Índice del tanque que controla este agente
-        self.depth = int(depth)  # Profundidad máxima para IDS
-        self.expanded_nodes = 0  # Contador de nodos expandidos
-        self.start_time = 0     # Tiempo de inicio de la búsqueda
-        self.time_limit = time_limit   # Límite de tiempo en segundos para tomar una decisión
-
-    def is_time_exceeded(self):
-        """Verifica si se ha excedido el límite de tiempo"""
-        return (
-            self.time_limit is not None
-            and (time.time() - self.start_time) > self.time_limit
-        )
+    def __init__(self, depth='1', tankIndex=0, time_limit=1.0):
+        super().__init__(depth=depth, tankIndex=tankIndex, time_limit=time_limit)
 
     def getAction(self, gameState):
         """
         Returns the best action found using iterative deepening search with alpha-beta pruning
         """
-        import time
-
+        self.reset_search()
         num_tanks = gameState.getNumAgents()
-
-        # Use the attribute 'index' if present, otherwise assume 0
-        root_index = getattr(self, 'index', 0)
-
-        self.start_time = time.time()
+        root_index = self.index
 
         def alpha_beta(state, depth, agent_index, alpha=float('-inf'), beta=float('inf')):
-            self.expanded_nodes += 1
+            self.increment_nodes()
 
             # Terminal or max depth reached
             if depth >= self.depth or state.isTerminal() or self.is_time_exceeded():
@@ -163,7 +122,7 @@ class AlphaBetaAgent():
                         break
                     succ = state.getSuccessor(agent_index, action)
                     v = max(v, alpha_beta(succ, next_depth, next_agent, alpha, beta))
-                    alpha = max(alpha,v)
+                    alpha = max(alpha, v)
                     if beta < alpha:
                         break
                 return v
@@ -187,7 +146,7 @@ class AlphaBetaAgent():
         best_action = legal_actions[0]
         best_score = float('-inf')
 
-        # Evaluate each root action
+        # Evaluate each root action with iterative deepening
         alpha = float('-inf')
         beta = float('inf')
         step = num_tanks if num_tanks > 0 else 1
@@ -202,20 +161,10 @@ class AlphaBetaAgent():
                     best_action = action
                 alpha = max(alpha, best_score)
 
-        # Si se superó el tiempo, fallback a agente reflexivo 50/50
-        try:
-            if self.is_time_exceeded():
-                from .reflexAgent import ReflexTankAgent
-                rtype = 'offensive' if random.random() < 0.5 else 'defensive'
-                reflex = ReflexTankAgent(script_type=rtype)
-                try:
-                    elapsed = time.time() - self.start_time if self.start_time else 0.0
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time after {elapsed:.2f}s, nodes={getattr(self,'expanded_nodes',None)} -> ReflexTankAgent({rtype})")
-                except Exception:
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time -> ReflexTankAgent({rtype})")
-                return reflex.getAction(gameState)
-        except Exception:
-            pass
+        # Check for fallback
+        fallback = self.maybe_fallback(gameState)
+        if fallback is not None:
+            return fallback
 
         return best_action
 
@@ -234,27 +183,24 @@ class ParallelAlphaBetaAgent(AlphaBetaAgent):
         super().__init__(depth=depth, tankIndex=tankIndex, time_limit=time_limit)
         # Optional cap for worker threads. If None, we'll use min(len(actions), cpu_count*5)
         self.max_workers = max_workers
+        self._counter_lock = threading.Lock()
+
+    def increment_nodes(self):
+        """Thread-safe node counter increment."""
+        with self._counter_lock:
+            self.expanded_nodes += 1
 
     def getAction(self, gameState):
         """
         Same iterative-deepening + alpha-beta structure as `AlphaBetaAgent.getAction`,
         but evaluates each root action's subtree in parallel using threads.
         """
-        import time
-
+        self.reset_search()
         num_tanks = gameState.getNumAgents()
-        root_index = getattr(self, 'index', 0)
-        self.start_time = time.time()
-
-        # Lock for thread-safe updates
-        counter_lock = threading.Lock()
+        root_index = self.index
 
         def alpha_beta(state, depth, agent_index, alpha=float('-inf'), beta=float('inf')):
-            # Local reference to speed access
-            nonlocal counter_lock
-
-            with counter_lock:
-                self.expanded_nodes += 1
+            self.increment_nodes()
 
             # Terminal or max depth reached
             if depth >= self.depth or state.isTerminal() or self.is_time_exceeded():
@@ -345,19 +291,9 @@ class ParallelAlphaBetaAgent(AlphaBetaAgent):
                         best_action = action
                     alpha = max(alpha, best_score)
 
-        # Si se superó el tiempo, fallback a agente reflexivo 50/50
-        try:
-            if self.is_time_exceeded():
-                from .reflexAgent import ReflexTankAgent
-                rtype = 'offensive' if random.random() < 0.5 else 'defensive'
-                reflex = ReflexTankAgent(script_type=rtype)
-                try:
-                    elapsed = time.time() - self.start_time if self.start_time else 0.0
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time after {elapsed:.2f}s, nodes={getattr(self,'expanded_nodes',None)} -> ReflexTankAgent({rtype})")
-                except Exception:
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time -> ReflexTankAgent({rtype})")
-                return reflex.getAction(gameState)
-        except Exception:
-            pass
+        # Check for fallback
+        fallback = self.maybe_fallback(gameState)
+        if fallback is not None:
+            return fallback
 
         return best_action

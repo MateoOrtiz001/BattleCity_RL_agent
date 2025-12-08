@@ -14,19 +14,6 @@
 # Adapted for BattleCity RL project.
 
 import random
-import math
-import sys
-import os
-
-# Configurar paths para imports
-current_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = os.path.dirname(current_dir)
-project_dir = os.path.dirname(src_dir)
-
-if src_dir not in sys.path:
-    sys.path.insert(0, src_dir)
-if project_dir not in sys.path:
-    sys.path.insert(0, project_dir)
 
 from src.utils import util
 from src.agents.learningAgents import ReinforcementAgent

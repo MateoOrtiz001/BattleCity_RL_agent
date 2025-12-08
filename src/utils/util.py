@@ -30,8 +30,14 @@ import sys
 import inspect
 import heapq
 import random
-import numba
 import io
+
+# numba is optional - used for accelerating manhattanDistance if available
+try:
+    import numba
+    _HAS_NUMBA = True
+except ImportError:
+    _HAS_NUMBA = False
 
 
 class FixedRandom:

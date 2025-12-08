@@ -2,20 +2,8 @@
 # -----------
 # Entrenador para agentes de Q-Learning en BattleCity
 
-import sys
-import os
 import time
 import pickle
-
-# Configurar paths correctamente
-current_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = os.path.dirname(current_dir)
-project_dir = os.path.dirname(src_dir)
-
-if src_dir not in sys.path:
-    sys.path.insert(0, src_dir)
-if project_dir not in sys.path:
-    sys.path.insert(0, project_dir)
 
 from src.training.environment import BattleCityEnvironment
 from src.agents.qlearningAgents import QLearningAgent, BattleCityQAgent, ApproximateQAgent

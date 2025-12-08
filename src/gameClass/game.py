@@ -1,14 +1,12 @@
-from ..utils import *
 import time
-import os
-import traceback
-import sys
 import copy
+import numpy as np
+
+from src.utils.util import manhattanDistance
 from .bullet import Bullet
 from .tank import Tank
 from .walls import Wall
 from .base import Base
-import numpy as np
 
 TIME_PENALTY = 1
 BASE_DISTANCE_PENALTY = 0

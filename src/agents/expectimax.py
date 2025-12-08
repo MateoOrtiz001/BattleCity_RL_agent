@@ -3,6 +3,9 @@ import time
 import random
 import threading
 import concurrent.futures
+
+from .base_search import BaseSearchAgent
+
 # Import reflex agent at module load to avoid import-time delay when used as fallback
 try:
     from .reflexAgent import ReflexTankAgent
@@ -10,32 +13,35 @@ except Exception:
     # If import fails here, fallback import will still be attempted lazily later.
     ReflexTankAgent = None
 
-class ExpectimaxAgent:
-    """Algoritmo Expectimax con profundización iterativa."""
-    def __init__(self, depth=2, time_limit=None, debug=False):
-        self.depth = depth
-        self.time_limit = time_limit
-        self.start_time = None
-        self.node_count = 0   # <--- NUEVO
-        self.debug = debug
 
-    def is_time_exceeded(self):
-        return (
-            self.time_limit is not None
-            and (time.time() - self.start_time) > self.time_limit
-        )
+class ExpectimaxAgent(BaseSearchAgent):
+    """Algoritmo Expectimax con profundización iterativa."""
+    
+    def __init__(self, depth=2, tankIndex=0, time_limit=None, debug=False):
+        super().__init__(depth=depth, tankIndex=tankIndex, time_limit=time_limit)
+        self.debug = debug
+        # Alias for compatibility (some code uses node_count)
+        self.node_count = 0
+    
+    def reset_search(self):
+        """Reset counters for a new search."""
+        super().reset_search()
+        self.node_count = 0
+    
+    def increment_nodes(self):
+        """Increment both node counters."""
+        self.expanded_nodes += 1
+        self.node_count += 1
 
     def getAction(self, gameState):
-        self.start_time = time.time()
-        self.node_count = 0  # <--- Reiniciar contador en cada decisión
+        self.reset_search()
         num_agents = gameState.getNumAgents()
         best_overall_score = float("-inf")
         best_overall_action = None
-        root_index = getattr(self, 'index', 0)
+        root_index = self.index
 
         def expectimax(state, depth, max_depth, agent_index):
-            # --- Contamos cada expansión ---
-            self.node_count += 1
+            self.increment_nodes()
 
             # Condición de parada
             if depth >= max_depth or self.is_time_exceeded() or state.isTerminal():
@@ -49,7 +55,6 @@ class ExpectimaxAgent:
             # Increment depth only when we cycle back to the root agent
             next_depth = depth + 1 if next_agent == root_index else depth
             legal_actions = state.getLegalActions(agent_index)
-            #print(f"[DEBUG] Acciones legales disponibles: {legal_actions}, para agente={agent_index} en profundidad={depth}")
             if not legal_actions:
                 return state.evaluate_state()
 
@@ -106,28 +111,14 @@ class ExpectimaxAgent:
             # --- Mostrar progreso por iteración ---
             if self.debug:
                 print(f"[Expectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
-            else:
-                # mostrar progreso ligero si no está silenciado
-                try:
-                    if not getattr(self, 'suppress_output', False):
-                        print(f"[Expectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
-                except Exception:
-                    print(f"[Expectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
-            try:
-                if self.is_time_exceeded():
-                    from .reflexAgent import ReflexTankAgent
-                    # 50/50 entre ofensivo y defensivo
-                    rtype = 'offensive' if random.random() < 0.5 else 'defensive'
-                    reflex = ReflexTankAgent(script_type=rtype)
-                    # Log de fallback
-                    try:
-                        elapsed = time.time() - self.start_time if self.start_time else 0.0
-                        print(f"[FALLBACK] {self.__class__.__name__} exceeded time after {elapsed:.2f}s, nodes={getattr(self,'node_count',None)} -> ReflexTankAgent({rtype})")
-                    except Exception:
-                        print(f"[FALLBACK] {self.__class__.__name__} exceeded time -> ReflexTankAgent({rtype})")
-                    return reflex.getAction(gameState)
-            except Exception:
-                pass
+            elif not getattr(self, 'suppress_output', False):
+                print(f"[Expectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
+            
+            # Check for fallback after each depth iteration
+            fallback = self.maybe_fallback(gameState)
+            if fallback is not None:
+                return fallback
+                
         return best_overall_action
 
     
@@ -243,30 +234,28 @@ class ExpectimaxAgent:
 
 class ParallelExpectimaxAgent(ExpectimaxAgent):
     """Algoritmo Expectimax que corre en paralelo."""
-    def __init__(self, depth=2, time_limit=None, debug=False, max_workers=None):
-        super().__init__(depth=depth, time_limit=time_limit, debug=debug)
+    
+    def __init__(self, depth=2, tankIndex=0, time_limit=None, debug=False, max_workers=None):
+        super().__init__(depth=depth, tankIndex=tankIndex, time_limit=time_limit, debug=debug)
         # max_workers for ThreadPoolExecutor; None -> default heuristic
         self.max_workers = max_workers
-
-    def getAction(self, gameState):
-        # initialize timing and node counter (thread-safe)
-        self.start_time = time.time()
-        self.node_count = 0
         self._node_count_lock = threading.Lock()
 
+    def increment_nodes(self):
+        """Thread-safe increment of node counters."""
+        with self._node_count_lock:
+            self.expanded_nodes += 1
+            self.node_count += 1
+
+    def getAction(self, gameState):
+        self.reset_search()
         num_agents = gameState.getNumAgents()
         best_overall_score = float("-inf")
         best_overall_action = None
-        root_index = getattr(self, 'index', 0)
+        root_index = self.index
 
         def expectimax(state, depth, max_depth, agent_index):
-            # thread-safe increment
-            try:
-                with self._node_count_lock:
-                    self.node_count += 1
-            except Exception:
-                # fallback (shouldn't happen) to non-locked increment
-                self.node_count += 1
+            self.increment_nodes()
 
             # stopping conditions
             if depth >= max_depth or self.is_time_exceeded() or state.isTerminal():
@@ -351,28 +340,12 @@ class ParallelExpectimaxAgent(ExpectimaxAgent):
             # --- Mostrar progreso por iteración ---
             if self.debug:
                 print(f"[ParallelExpectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
-            else:
-                try:
-                    if not getattr(self, 'suppress_output', False):
-                        print(f"[ParallelExpectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
-                except Exception:
-                    print(f"[ParallelExpectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
+            elif not getattr(self, 'suppress_output', False):
+                print(f"[ParallelExpectimax] Profundidad {current_max}: nodos expandidos = {self.node_count}")
 
-        # Si se superó el tiempo de búsqueda, usar agente reflexivo como fallback
-        try:
-            if self.is_time_exceeded():
-                from .reflexAgent import ReflexTankAgent
-                # 50/50 entre ofensivo y defensivo
-                rtype = 'offensive' if random.random() < 0.5 else 'defensive'
-                reflex = ReflexTankAgent(script_type=rtype)
-                # Log de fallback
-                try:
-                    elapsed = time.time() - self.start_time if self.start_time else 0.0
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time after {elapsed:.2f}s, nodes={getattr(self,'node_count',None)} -> ReflexTankAgent({rtype})")
-                except Exception:
-                    print(f"[FALLBACK] {self.__class__.__name__} exceeded time -> ReflexTankAgent({rtype})")
-                return reflex.getAction(gameState)
-        except Exception:
-            pass
+        # Check for fallback
+        fallback = self.maybe_fallback(gameState)
+        if fallback is not None:
+            return fallback
 
         return best_overall_action

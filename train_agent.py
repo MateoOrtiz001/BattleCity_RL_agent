@@ -16,15 +16,10 @@ Uso:
 import sys
 import os
 
-# Configurar paths correctamente
+# Configurar path del proyecto
 project_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = os.path.join(project_dir, 'src')
-
-# Agregar directorios al path
 if project_dir not in sys.path:
     sys.path.insert(0, project_dir)
-if src_dir not in sys.path:
-    sys.path.insert(0, src_dir)
 
 from src.training.trainer import QLearningTrainer
 

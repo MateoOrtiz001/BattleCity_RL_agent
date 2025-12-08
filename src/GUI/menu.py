@@ -5,12 +5,6 @@ from typing import Optional, Any
 
 import pygame
 
-# Ensure repo root is on sys.path so this file can be run directly
-# repo root is two levels up from src/GUI
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)
-
 from src.gameClass.game import BattleCityState
 from src.gameClass.scenarios.level1 import get_level1
 from src.gameClass.scenarios.level2 import get_level2

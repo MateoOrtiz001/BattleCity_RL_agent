@@ -3,21 +3,6 @@
 # Entorno de entrenamiento para BattleCity RL
 # Conecta el juego con los agentes de aprendizaje por refuerzo.
 
-import sys
-import os
-import copy
-
-# Configurar paths correctamente para permitir imports desde src
-current_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = os.path.dirname(current_dir)
-project_dir = os.path.dirname(src_dir)
-
-if src_dir not in sys.path:
-    sys.path.insert(0, src_dir)
-if project_dir not in sys.path:
-    sys.path.insert(0, project_dir)
-
-# Importar desde el paquete src
 from src.gameClass.game import BattleCityState
 from src.gameClass.gameState import RLState
 from src.gameClass.scenarios.level1 import get_level1

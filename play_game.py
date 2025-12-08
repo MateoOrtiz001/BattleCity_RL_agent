@@ -19,13 +19,10 @@ import time
 import argparse
 import pickle
 
-# Configurar paths
+# Configurar path del proyecto
 project_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = os.path.join(project_dir, 'src')
 if project_dir not in sys.path:
     sys.path.insert(0, project_dir)
-if src_dir not in sys.path:
-    sys.path.insert(0, src_dir)
 
 import pygame
 

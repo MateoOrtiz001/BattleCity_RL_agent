@@ -1,5 +1,5 @@
 from .game import BattleCityState
-from ..utils import *
+from ..utils.util import manhattanDistance
 
 class RLState:
     """

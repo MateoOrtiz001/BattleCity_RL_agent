@@ -14,6 +14,10 @@ class Tank():
     def getPos(self):
         return self.position
     
+    def getPosition(self):
+        """Alias de getPos para consistencia con otras clases."""
+        return self.position
+    
     def getTeam(self):
         return self.team
     

@@ -9,6 +9,45 @@ class ReflexTankAgent:
     def __init__(self,script_type='offensive'):
         self.agent_index = 0  # Índice del agente jugador
         self.script_type = script_type
+    
+    def _enemy_in_direction(self, game_state, origin, direction):
+        """Comprueba si existe un enemigo en línea de fuego desde origin en direction.
+        
+        Retorna True si hay un enemigo alcanzable con máximo 1 muro de ladrillo intermedio.
+        Retorna False si hay muro de acero o más de 1 muro intermedio.
+        """
+        dirs = {'UP': (0,1), 'DOWN': (0,-1), 'LEFT': (-1,0), 'RIGHT': (1,0)}
+        dx, dy = dirs.get(direction, (0,0))
+        tx, ty = origin
+        wall_count = 0
+        
+        while 0 <= tx + dx < game_state.getBoardSize() and 0 <= ty + dy < game_state.getBoardSize():
+            tx += dx
+            ty += dy
+            
+            # Chequear muros
+            for wall in game_state.getWalls():
+                if not wall.isDestroyed() and wall.getPosition() == (tx, ty):
+                    if wall.getType() == 'steel':
+                        return False
+                    else:
+                        wall_count += 1
+                        if wall_count > 1:
+                            return False
+                        # brick, la bala podría seguir
+                        break
+
+            # Chequear tanques enemigos
+            for et in game_state.getTeamBTanks():
+                if et is None:
+                    continue
+                if et.isAlive() and et.getPos() == (tx, ty):
+                    # si hay como máximo 1 pared entre origen y objetivo, consideramos que hay un objetivo
+                    if wall_count <= 1:
+                        return True
+                    return False
+
+        return False
         
     
     def getAction(self, game_state):
@@ -39,38 +78,6 @@ class ReflexTankAgent:
         # Evalua las acciones y elige la mejor para ir a atacar más agresivamente
         score = []
 
-        # Helper: comprobar si existe un enemigo en la dirección del FIRE
-        def enemy_in_direction(origin, direction):
-            dirs = {'UP': (0,1), 'DOWN': (0,-1), 'LEFT': (-1,0), 'RIGHT': (1,0)}
-            dx, dy = dirs.get(direction, (0,0))
-            tx, ty = origin
-            wall_count = 0
-            while 0 <= tx + dx < game_state.getBoardSize() and 0 <= ty + dy < game_state.getBoardSize():
-                tx += dx; ty += dy
-                # Chequear muros
-                for wall in game_state.getWalls():
-                    if not wall.isDestroyed() and wall.getPosition() == (tx, ty):
-                        if wall.getType() == 'steel':
-                            return False
-                        else:
-                            wall_count += 1
-                            if wall_count > 1:
-                                return False
-                            # brick, la bala podría seguir
-                            break
-
-                # Chequear tanques enemigos
-                for et in game_state.getTeamBTanks():
-                    if et is None:
-                        continue
-                    if et.isAlive() and et.getPos() == (tx, ty):
-                        # si hay como máximo 1 pared entre origen y objetivo, consideramos que hay un objetivo
-                        if wall_count <= 1:
-                            return True
-                        return False
-
-            return False
-
         # Estado actual del tanque (antes de aplicar la acción)
         cur_tank = game_state.getTeamATank()
         cur_pos = cur_tank.getPos() if cur_tank and cur_tank.isAlive() else None
@@ -79,7 +86,7 @@ class ReflexTankAgent:
             # Priorizar disparos que apunten a un enemigo vivo en línea de fuego
             if isinstance(action, str) and action.startswith('FIRE_') and cur_pos is not None:
                 _, dir = action.split('_', 1)
-                if enemy_in_direction(cur_pos, dir):
+                if self._enemy_in_direction(game_state, cur_pos, dir):
                     # Score muy alto para asegurar prioridad frente a movimientos
                     score.append(1000.0)
                     continue
@@ -116,36 +123,6 @@ class ReflexTankAgent:
         """
         score = []
 
-        # Reusar helper para detectar enemigos en dirección de FIRE
-        def enemy_in_direction(origin, direction):
-            dirs = {'UP': (0,1), 'DOWN': (0,-1), 'LEFT': (-1,0), 'RIGHT': (1,0)}
-            dx, dy = dirs.get(direction, (0,0))
-            tx, ty = origin
-            wall_count = 0
-            while 0 <= tx + dx < game_state.getBoardSize() and 0 <= ty + dy < game_state.getBoardSize():
-                tx += dx; ty += dy
-                # Chequear muros
-                for wall in game_state.getWalls():
-                    if not wall.isDestroyed() and wall.getPosition() == (tx, ty):
-                        if wall.getType() == 'steel':
-                            return False
-                        else:
-                            wall_count += 1
-                            if wall_count > 1:
-                                return False
-                            break
-
-                # Chequear tanques enemigos
-                for et in game_state.getTeamBTanks():
-                    if et is None:
-                        continue
-                    if et.isAlive() and et.getPos() == (tx, ty):
-                        if wall_count <= 1:
-                            return True
-                        return False
-
-            return False
-
         base = game_state.getBase()
         try:
             base_pos = base.getPosition()
@@ -159,7 +136,7 @@ class ReflexTankAgent:
             # Priorizar FIRE si apunta a enemigo
             if isinstance(action, str) and action.startswith('FIRE_') and cur_pos is not None:
                 _, dir = action.split('_', 1)
-                if enemy_in_direction(cur_pos, dir):
+                if self._enemy_in_direction(game_state, cur_pos, dir):
                     score.append(1000.0)
                     continue
 
