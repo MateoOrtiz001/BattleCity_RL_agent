@@ -65,13 +65,15 @@ def train_basic_agent():
     return trainer, stats
 
 
-def train_approximate_agent():
+def train_approximate_agent(use_reduced_state=True):
     """
     Entrena un agente con aproximación de función.
     Mejor para generalizar a estados no vistos.
     """
     print("\n" + "="*60)
     print("ENTRENAMIENTO - Approximate Q-Learning")
+    if not use_reduced_state:
+        print("(Usando estados completos)")
     print("="*60 + "\n")
     
     trainer = QLearningTrainer(
@@ -80,7 +82,8 @@ def train_approximate_agent():
         gamma=0.95,         # Factor de descuento alto
         alpha=0.1,          # Tasa de aprendizaje más baja
         num_episodes=2000,  # Más episodios
-        use_approximate=True
+        use_approximate=True,
+        use_reduced_state=use_reduced_state
     )
     
     stats = trainer.train(
@@ -149,6 +152,8 @@ if __name__ == '__main__':
                         help='Ruta para guardar el agente')
     parser.add_argument('--save-every', type=int, default=500, 
                         help='Guardar modelo cada N episodios')
+    parser.add_argument('--full-state', action='store_true', 
+                        help='Usar estado completo en lugar de reducido (recomendado para Approximate Q-Learning)')
     
     args = parser.parse_args()
     
@@ -166,7 +171,8 @@ if __name__ == '__main__':
                 gamma=args.gamma,
                 alpha=args.alpha,
                 num_episodes=args.episodes,
-                use_approximate=False
+                use_approximate=False,
+                use_reduced_state=not args.full_state
             )
             
             trainer.train(
@@ -186,6 +192,8 @@ if __name__ == '__main__':
             # Entrenamiento personalizado aproximado
             print("\n" + "="*60)
             print(f"ENTRENAMIENTO - Approximate Q-Learning ({args.episodes} episodios)")
+            if args.full_state:
+                print("(Usando estados completos)")
             print("="*60 + "\n")
             
             trainer = QLearningTrainer(
@@ -194,7 +202,8 @@ if __name__ == '__main__':
                 gamma=args.gamma,
                 alpha=args.alpha,
                 num_episodes=args.episodes,
-                use_approximate=True
+                use_approximate=True,
+                use_reduced_state=not args.full_state
             )
             
             trainer.train(
@@ -211,7 +220,7 @@ if __name__ == '__main__':
                 print("="*60 + "\n")
                 trainer.test(num_episodes=args.test)
         else:
-            train_approximate_agent()
+            train_approximate_agent(use_reduced_state=not args.full_state)
     else:
         # Entrenamiento personalizado
         trainer = QLearningTrainer(
@@ -220,7 +229,8 @@ if __name__ == '__main__':
             gamma=args.gamma,
             alpha=args.alpha,
             num_episodes=args.episodes or 1000,
-            use_approximate=(args.mode == 'approximate')
+            use_approximate=(args.mode == 'approximate'),
+            use_reduced_state=not args.full_state
         )
         
         trainer.train(

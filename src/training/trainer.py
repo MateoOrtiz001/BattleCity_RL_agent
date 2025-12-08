@@ -29,7 +29,7 @@ class QLearningTrainer:
     
     def __init__(self, agent=None, env=None, level=1, 
                  epsilon=0.3, gamma=0.9, alpha=0.2, 
-                 num_episodes=1000, use_approximate=False):
+                 num_episodes=1000, use_approximate=False, use_reduced_state=True):
         """
         Inicializa el entrenador.
         
@@ -42,9 +42,10 @@ class QLearningTrainer:
             alpha: Tasa de aprendizaje
             num_episodes: Número de episodios de entrenamiento
             use_approximate: Si True, usa ApproximateQAgent con características
+            use_reduced_state: Si True, usa estados reducidos (RLState). Si False, usa estados completos.
         """
         # Crear entorno
-        self.env = env if env else BattleCityEnvironment(level=level)
+        self.env = env if env else BattleCityEnvironment(level=level, use_reduced_state=use_reduced_state)
         
         # Crear agente
         if agent:

@@ -627,7 +627,7 @@ def main():
                 else:
                     break
         except KeyboardInterrupt:
-            print("\n\n⏹️ Partida interrumpida.")
+            print("\n\n Partida interrumpida.")
         # Cerrar pygame
         try:
             pygame.quit()
