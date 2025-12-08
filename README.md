@@ -2,6 +2,8 @@
 
 Agente de Aprendizaje por Refuerzo (Q-Learning) para el videojuego clásico BattleCity. El proyecto implementa tanto Q-Learning tabular como aproximado con características lineales.
 
+
+[![Vídeo de Muestra](https://img.youtube.com/vi/nLUwcIf3_e8/sddefault.jpg)](https://youtube.com/shorts/nLUwcIf3_e8)
 ## Descripción
 
 Este proyecto entrena un agente inteligente para jugar una versión reducida de BattleCity, donde el objetivo es destruir todos los tanques enemigos mientras se protege la base aliada. El agente aprende a través de la interacción con el entorno, optimizando sus decisiones para maximizar la recompensa acumulada.
