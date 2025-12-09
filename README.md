@@ -1,4 +1,4 @@
-# BattleCity RL Agent
+# Análisis de las cadenas de Markov para el agente entrenado por RL
 
 Implementación de agentes de Inteligencia Artificial para el juego Battle City utilizando técnicas de Aprendizaje por Refuerzo y algoritmos de búsqueda adversarial. El cuaderno con los experimentos reproducibles se encuentra en el cuaderno de Colab <a href="https://colab.research.google.com/drive/1FEEV7XqpNBkCPceiMQBcTx4-8pKv2aAw?usp=sharing" target="_blank">
     <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
