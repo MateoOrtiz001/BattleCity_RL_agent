@@ -1,4 +1,5 @@
 # BattleCity RL Agent
+![Banner](assets/banner.gif)
 
 Agente de Aprendizaje por Refuerzo (Q-Learning) para el videojuego clásico BattleCity. El proyecto implementa tanto Q-Learning tabular como aproximado con características lineales.
 
