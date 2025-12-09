@@ -1,6 +1,8 @@
 # BattleCity RL Agent
 
-Implementación de agentes de Inteligencia Artificial para el juego Battle City utilizando técnicas de Aprendizaje por Refuerzo y algoritmos de búsqueda adversarial.
+Implementación de agentes de Inteligencia Artificial para el juego Battle City utilizando técnicas de Aprendizaje por Refuerzo y algoritmos de búsqueda adversarial. El cuaderno con los experimentos reproducibles se encuentra en el cuaderno de Colab <a href="https://colab.research.google.com/drive/1FEEV7XqpNBkCPceiMQBcTx4-8pKv2aAw?usp=sharing" target="_blank">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>.
 ## Integrantes
 
 - Mateo Ortiz
@@ -15,143 +17,45 @@ Implementación de agentes de Inteligencia Artificial para el juego Battle City 
   <p><em>Vídeo subido a youtube</em></p>
 </div>
 
-## Descripción
+## Introducción y Objetivo del Proyecto
+Este proyecto se enfoca en el **Aprendizaje por Refuerzo (RL)**, un área de la inteligencia artificial donde un agente interactúa con un entorno estocástico para encontrar una política óptima $\pi: S \rightarrow A$ que maximice su recompensa .
 
-Este proyecto implementa varios agentes inteligentes capaces de jugar una versión simplificada del clásico juego Battle City (NES, 1985). El objetivo del jugador es destruir todos los tanques enemigos mientras protege su base de ser destruida.
+El objetivo fue analizar políticas resultantes del entrenamiento de un agente que juega una **versión reducida del clásico juego BattleCity**. Específicamente, buscamos evaluar la eficiencia del agente en función de su tiempo de entrenamiento a través del **análisis de las Cadenas de Markov (CM) inducidas por estas políticas**. Este enfoque permite cuantificar la calidad de las políticas aprendidas e identificar tendencias estructurales en el comportamiento del agente.
 
-### Características del Juego
+## Modelamiento y Metodología
 
-- Tablero de juego en cuadrícula (13x13)
-- Tanque del jugador vs múltiples tanques enemigos
-- Muros destructibles (ladrillo) e indestructibles (acero)
-- Base que debe ser protegida
-- Sistema de disparos y colisiones
+El agente se entrenó utilizando el algoritmo de **Q-learning**, que se basa en la iteración de Q-valores para estimar la utilidad esperada de tomar una acción en un estado dado, aunque el agente no posea información previa sobre las funciones de transición ($T$) o recompensa ($R$) del entorno. Los algoritmos de aprendizaje por refuerzo están fundados en los **Procesos de Decisión de Markov (MDP)**.
 
-## Agentes Implementados
+### Cadena de Markov Inducida
 
-| Agente | Tipo | Descripción |
-|--------|------|-------------|
-| `QLearningAgent` | Aprendizaje por Refuerzo | Q-Learning tabular para espacios de estados discretos |
-| `ApproximateQAgent` | Aprendizaje por Refuerzo | Q-Learning con aproximación de funciones lineales |
-| `MinimaxAgent` | Búsqueda Adversarial | Algoritmo Minimax para decisiones óptimas |
-| `AlphaBetaAgent` | Búsqueda Adversarial | Minimax con poda alfa-beta |
-| `ExpectimaxAgent` | Búsqueda Adversarial | Expectimax para enemigos estocásticos |
-| `ReflexTankAgent` | Basado en Reglas | Agente reactivo con comportamiento ofensivo/defensivo |
+Una política aprendida genera una sucesión de estados y acciones en una simulación, lo que a su vez induce una **Cadena de Markov sobre los posibles estados del mundo**. Al contar las frecuencias de transiciones observadas durante las simulaciones, se estiman las probabilidades de transición de esta cadena.
 
-## Estructura del Proyecto
+### Reducción del Espacio de Estados
 
-```
-BattleCity_RL_agent/
-├── play_game.py              # Visualizar partidas con agente entrenado
-├── train_agent.py            # Entrenar agentes de Q-Learning
-├── models/                   # Agentes entrenados (.pkl)
-├── src/
-│   ├── agents/               # Implementación de agentes
-│   │   ├── base_search.py    # Clase base para agentes de búsqueda
-│   │   ├── qlearningAgents.py
-│   │   ├── learningAgents.py
-│   │   ├── minimax.py
-│   │   ├── expectimax.py
-│   │   ├── reflexAgent.py
-│   │   └── enemyAgent.py
-│   ├── gameClass/            # Lógica del juego
-│   │   ├── game.py           # Estado principal del juego
-│   │   ├── gameState.py      # Estados reducidos para RL
-│   │   ├── tank.py
-│   │   ├── bullet.py
-│   │   ├── walls.py
-│   │   ├── base.py
-│   │   └── scenarios/        # Niveles del juego (1-4)
-│   ├── training/             # Sistema de entrenamiento
-│   │   ├── environment.py    # Entorno de RL
-│   │   └── trainer.py        # Clase QLearningTrainer
-│   ├── GUI/                  # Interfaz gráfica
-│   │   └── menu.py
-│   └── utils/                # Utilidades
-│       └── util.py
-├── PLAY_GAME_GUIDE.md        # Guía detallada para jugar
-└── TRAINING_GUIDE.md         # Guía detallada para entrenar
-```
+El juego original de BattleCity presentaba un número de configuraciones posibles que lo hacía intratable ($\approx 2.6 \times 10^9$ estados). Para acelerar el aprendizaje y facilitar el análisis con CM, se optó por una **representación de estado abstracta y reducida**.
 
-## Requisitos
+El estado se modeló como una tupla que contiene información parcial del juego, como la vida del jugador, la vida de los enemigos, la posición relativa de peligro a la base, y si hay peligro en la dirección del jugador. Esta abstracción redujo el espacio total a solo **1024 estados posibles**.
 
-- Python 3.8+
-- pygame
-- numpy
+## Experimentos y Resultados Clave
 
-## Instalación
+Se analizaron tres modelos de agentes entrenados con diferentes cantidades de iteraciones de Q-learning: **Modelo 1 (10000 pasos), Modelo 2 (50000 pasos) y Modelo 3 (100000 pasos)**. Para cada modelo, se extrajo una Cadena de Markov a partir de **1500 trayectorias simuladas**.
 
-1. Clonar el repositorio:
-```bash
-git clone https://github.com/tu-usuario/BattleCity_RL_agent.git
-cd BattleCity_RL_agent
-```
+Los análisis principales se centraron en el cálculo de la **Matriz Fundamental ($M$)** y la matriz de probabilidades terminales ($G = MA$).
 
-2. Instalar dependencias:
-```bash
-pip install pygame numpy
-```
+### Hallazgos Principales
 
-## Uso Rápido
+1.  **Eficiencia y Exploración:** El comportamiento del agente evoluciona de una fase de exploración a una de explotación eficiente.
+    *   El **Modelo 2** (entrenamiento intermedio) exhibió el mayor número de pasos esperados para alcanzar un estado final (victoria o derrota), aproximadamente **89.36 pasos**, lo que sugiere que oscila y explora más tiempo alrededor del estado inicial.
+    *   El **Modelo 3** (más entrenado) se estabiliza y converge al resultado en menos pasos esperados, aproximadamente **25.02 pasos**, demostrando una fase de explotación más decisiva .
 
-### Entrenar un Agente
+2.  **Probabilidades Terminales:** Al aumentar el entrenamiento, la política se vuelve más exitosa.
+    *   El **Modelo 3** logró la **mayor proporción de victorias (77.5 %)** y la menor proporción de derrotas (16.3 %).
+    *   Además, el Modelo 3 redujo significativamente el número de estados únicos explorados (883), concentrándose en regiones del espacio de estados asociadas con trayectorias más estables y exitosas.
 
-```bash
-# Entrenamiento básico (Q-Learning tabular, 1000 episodios)
-python train_agent.py --mode basic
-
-# Entrenamiento con aproximación de funciones (2000 episodios)
-python train_agent.py --mode approximate
-
-# Entrenamiento personalizado
-python train_agent.py --episodes 5000 --epsilon 0.3 --alpha 0.2 --level 1
-```
-
-### Visualizar Partidas
-
-```bash
-# Jugar con el agente entrenado (interfaz gráfica)
-python play_game.py
-
-# Especificar un agente diferente
-python play_game.py --agent models/agent_final.pkl
-
-# Modo texto (sin interfaz gráfica)
-python play_game.py --text
-
-# Ajustar velocidad de visualización
-python play_game.py --delay 200
-```
-
-### Controles (Modo Gráfico)
-
-| Tecla | Acción |
-|-------|--------|
-| `ESC` | Salir |
-| `SPACE` | Pausar/Reanudar |
-| `+` / `-` | Ajustar velocidad |
-| `ENTER` | Siguiente partida |
-
+3.  **Análisis Riesgo-Recompensa:**
+    *   El análisis demostró que el **Modelo 3** es el más robusto, ya que la mayoría de sus estados se agruparon en torno a recompensas esperadas positivas con **niveles de riesgo bajos o moderados**.
+    *   Esto indica que, con más entrenamiento, el agente reduce la exposición a situaciones muy penalizadas (recompensas negativas) y mejora el balance riesgo-recompensa de su política.
 ## Documentación Adicional
-
+En la [rama principal](https://github.com/MateoOrtiz001/BattleCity_RL_agent) se puede encontrar toda la documentación sobre el proyecto del agente en sí. Además de las siguientes guías de uso:
 - [Guía de Entrenamiento](TRAINING_GUIDE.md) - Detalles sobre parámetros, función de recompensa y características
 - [Guía de Visualización](PLAY_GAME_GUIDE.md) - Opciones de visualización y controles
-
-## Ejemplo de Uso Programático
-
-```python
-from src.agents import MinimaxAgent, ExpectimaxAgent
-from src.training import BattleCityEnvironment
-
-# Crear entorno
-env = BattleCityEnvironment(level=1)
-state = env.reset()
-
-# Crear agente
-agent = MinimaxAgent(depth=2, time_limit=1.0)
-
-# Obtener acción
-game_state = env.game_state
-action = agent.getAction(game_state)
-print(f"Acción seleccionada: {action}")
-```
