@@ -1,12 +1,19 @@
 # BattleCity RL Agent
 
 Implementación de agentes de Inteligencia Artificial para el juego Battle City utilizando técnicas de Aprendizaje por Refuerzo y algoritmos de búsqueda adversarial.
-
 ## Integrantes
 
 - Mateo Ortiz
 - Santiago Botero
 - Juan Diego González
+
+<div align="center">
+  <h3> Video Presentación</h3>
+  <a href="https://youtu.be/otL7HJ0bihU" target="_blank">
+    <img src="https://img.youtube.com/vi/otL7HJ0bihU/0.jpg" alt="Video demostrativo" width="600">
+  </a>
+  <p><em>Vídeo subido a youtube</em></p>
+</div>
 
 ## Descripción
 
